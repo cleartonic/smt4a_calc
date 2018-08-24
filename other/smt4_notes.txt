@@ -1,0 +1,43 @@
+call 'fusion 2 levels down' on Mot  (some code has been updated)
+
+for final_combo in d.fusions:
+	final_combo_perm = []			# compile a final list of all permutations, a list of lists. The master list will follow the implicit ordering of the final_combo's demons. Then each element will house all the fusions for that demon. 
+											#	Example, Mot → Nergal x Gnome. This will house two lists, the first is implicitly Nergal's fusion combinations. The second element is Gnome's fusion combinations. 
+											#  The idea is that if there are more than two demons required for the top level fusion, this can be achieved 
+	combo_len = len(final_combo)	 # identify how long the combo chain is for this stage. Usually 2, but could be more
+	for demon in final_combo[range(combo_len)]:  # iterate through however many demons in the original combo chain. I.e, Nergal's fusions, then Gnome's fusions
+		final_combo_perm.append(demon.fusions)
+	
+	# print(list(itertools.product())
+		
+		
+		
+BELOW returns a proper list for one element of d.fusions (for Nergal x Gnome)
+
+
+d = find_demon('Mot')
+
+final_master = []
+for final_combo in d.fusions:
+    final_combo_perm = []
+    combo_len = len(final_combo)
+    for demon_num in range(combo_len):
+        demon = final_combo[demon_num]
+        print(demon.name)
+        temp_fusions = []
+        for fusion in demon.fusions:
+            temp_fusions.append([[demon],fusion])
+        final_combo_perm.append(temp_fusions)
+    final_master.append(list(itertools.product(*final_combo_perm)))
+		
+		
+final_master is a huge list for two levels down. It houses for 1 final_result demon, all possible combinations 2 levels down. 
+
+Captures the following in list element order
+
+
+final_master - Represents each combination for the final_result, stored as Result objects. One for each demon pairing that becomes the demon. For example, Mot has 73 different combinations to be made from. This list is 73 long. 
+
+final_master[0] - Represents one of the 73 combinations. E.g., Nergal x Gnome → Mot
+final_master[0][0] - Represents one of the permutations to arrive at Nergal x Gnome. There will be many elements in this grouping - this is done by dynamically identfying all possible outcomes from source demons.
+final_master[0][0][0] - Represents the individual demons needed to create the FIRST of the demon's needed for Nergal. Stored as a Results object.

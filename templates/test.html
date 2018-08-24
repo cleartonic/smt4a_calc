@@ -1,0 +1,41 @@
+<html>
+    <head>
+        <title>Reusable Form Demo</title>
+    </head>
+    <body>
+        <form action = "http://127.0.0.1:5000" method = post>
+            {{ form.csrf }}
+ 
+            <div class="input text">
+                {{ form.skill1.label }} <br>
+				{{ form.skill1 }}<br>
+				{{ form.skill2 }}<br>
+				{{ form.skill3 }}<br>
+				{{ form.skill4 }}<br>
+				{{ form.skill5 }}<br>
+				{{ form.skill6 }}<br>
+				{{ form.skill7 }}<br>
+				{{ form.skill8 }}<br>
+				<br>
+                {{ form.target_demon.label }}<br>
+                {{ form.target_demon }}<br>
+				<br>
+                {{ form.fusion_level.label }} <br>
+                {{ form.fusion_level }}<br>
+                {{ form.skill_match_only.label }}
+                {{ form.skill_match_only }}<br>
+                {{ form.max_only.label }}
+                {{ form.max_only }}<br>
+				<input type = "submit" value ="Submit">
+            </div>
+            
+            <div class='results'>
+                   Results:
+                  {% for i in output_results %}
+                        <p>{{ i }} </p>
+                  {% endfor %}
+            
+            </div>
+        </form>
+    </body>
+</html>
