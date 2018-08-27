@@ -6,6 +6,7 @@ Created on Mon Aug 13 10:09:22 2018
 """
 
 import pandas as pd
+import numpy as np
 import pickle
 import itertools
 import logging
@@ -20,13 +21,26 @@ pd.options.mode.chained_assignment = None
 
 ### TO DO
 #
-#
-# Set up a collection class for results of a generated query
-# Figure out how to connect multiple 'levels' of searches for a final_result (big task)
+# 1) visual representation of all output strings in html
+# 2) filtering of outputs already generated
+# 
 # Finish building database, somehow figure out how to load special fusions into objects and save (diff format than df_fusions)
 #
 ###
 
+
+
+# USE THIS FOR HTML RENDERING IN SCORE ORDER
+
+#master_check = []
+#for score_dict in rc.score_dict.values():
+#    print("SCORE -------------- "+str(score_dict))
+#    for rt in rc.resulttree_list:
+#        if rt.score_list == score_dict:
+#            master_check.append(rt)
+#            print(rt.final_str)
+            
+            
 
 ######################## FUNCTIONS #####################################
 #
@@ -42,10 +56,21 @@ def find_demon(demon_name_str,demon_master):
             return i
     logging.info("No matches found for demon "+demon_name_str)
 
-def assign_combinations(demon_name_str,demon_master):
+def assign_combinations(demon_name_str,demon_master,final_result_lv):
     all_combos = []
     all_combos_names = []
+    
+    if final_result_lv <= 0:
+        final_result_lv = 99
+    
+    # Create a verison of df_fusion that 1) calculates min level per combination & 2) filters on thatfor final_result_lv  
     df_fusion_2 = df_fusion[df_fusion['result_name'] == demon_name_str]
+    
+    def return_lv(x,y):
+        return max([x,y])
+    df_fusion_2['min_level'] =  np.vectorize(return_lv, otypes=["O"]) (df_fusion_2['1_level'], df_fusion_2['2_level'])
+    df_fusion_2 = df_fusion_2[df_fusion_2['min_level']<=final_result_lv]
+    
     df_fusion_2.reset_index(inplace=True)
     for index,row in df_fusion_2.iterrows():
         demon1 = find_demon(df_fusion_2['1_name'].iloc[index],demon_master)
@@ -55,6 +80,7 @@ def assign_combinations(demon_name_str,demon_master):
     return all_combos, all_combos_names
 
 
+    
 def find_scores(dict_list):
     # Argument = a set of skill_dict's to find the overall ResultTree's score
     # Returns a new dictionary
@@ -68,6 +94,26 @@ def find_scores(dict_list):
                 comp_dict[key] = 1
     
     return comp_dict
+
+    # Build demons, stored in demon_master
+def build_demon_master():
+    # pass fusion_limit as integer
+
+
+    demon_master = []
+    for demon_lookup in df_bestiary['name'].unique().tolist():
+        # build from skills
+        skill_list = df_skills.loc[df_skills['demon_name'] == demon_lookup]['name'].unique().tolist()
+        
+        # build from bestiary
+        df = df_bestiary.loc[df_bestiary['name'] == demon_lookup]
+        if not df.empty:
+            stat_list = df.iloc[0].to_dict()  # temp dict for all demon stats
+            stat_list['skill_list'] = skill_list # add skill_list
+            demon_master.append(Demon(**stat_list)) # add new demon to master with stats & skills
+        else:
+            logging.info("Demon master empty...")
+    return demon_master
 
 ######################## CLASSES #####################################
 #
@@ -87,8 +133,8 @@ class Demon:  #['race', 'lv', 'name', 'hp', 'mp', 'st', 'dx', 'ma', 'ag', 'lu', 
             self.demon_qualifier = " (R)"
         self.name_output = self.name + self.demon_qualifier
             
-    def find_fusions(self,demon_master):
-        self.fusions, self.fusions_names = assign_combinations(self.name,demon_master)  # using the newly assigned self.name, find all combinations and store both the name list and the Demon objects list
+    def find_fusions(self,demon_master,final_result_lv):
+        self.fusions, self.fusions_names = assign_combinations(self.name,demon_master,final_result_lv)  # using the newly assigned self.name, find all combinations and store both the name list and the Demon objects list
         self.fusions.append([self])    # Assigns itself, useful for combo searches later
         self.fusions_names.append([self]) # Assigns itself, useful for combo searches later
     def find_skills(self,skill_list):
@@ -282,6 +328,9 @@ class ResultTree:
         self.recruit_score_num = r_num
         self.recruit_score = self.recruit_score_num / self.recruit_score_max
         
+        # 
+        self.score_list = [self.skill_score,self.recruit_score,self.demon_score]
+        
         # Calculate end score & output str
         if self.scored:
             temp = []
@@ -303,13 +352,131 @@ class ResultCluster:
     #   It shouldn't matter how you get to the result_demon, just that you get there with the skills along the way,
     #   and that the skill score / recruitable score will dictate its viability
             
-    def __init__(self, final_result, resulttree_list):
-        self.final_result = final_result
-        self.resulttree_list = resulttree_list
+    def __init__(self, final_result_str,skills_input,fusion_level,skill_match_only,max_only):
+        self.resulttree_list = []
+        self.skills_input = skills_input
+        self.skill_match_only = skill_match_only
+        self.save_only_flag = True
+        self.max_only_flag = max_only        
+        self.demon_master = build_demon_master()
+        self.final_result = find_demon(final_result_str,self.demon_master)
+        if fusion_level <= 0:
+            self.fusion_level = self.final_result.lv
+        else:
+            self.fusion_level = fusion_level
         self.output_results = []
-
-    def print_results(self,save_only=False,max_only=False):
         
+
+
+    def generate_results(self):
+        logging.info("Cluster generation start.")
+        global demon_master
+        
+        fusion_limit = fusion_level
+        
+        logging.info("Scoring demons on skill list...")
+        
+        for demon in self.demon_master:
+            demon.find_skills(skills_input)
+            demon.find_fusions(self.demon_master,self.final_result.lv)  #Passing the FINAL RESULT'S LEVEL as the filter. This will pass all the way down to ALL demon fusions
+        logging.info("Scored demons on skill list.")
+        logging.info("Starting fusion combo generation...")
+        
+        
+        # Data validation/cleanup
+        final_master = []
+        if self.skills_input == ['']:
+            self.skill_match_only = False
+        
+        # Default to target demon level if nothing given 
+        if type(fusion_limit) != int or fusion_limit  <= 0:
+            fusion_limit = self.final_result.lv
+
+        
+        for i, final_combo in enumerate(self.final_result.fusions):
+            final_combo_perm = []
+            combo_len = len(final_combo)
+            for demon_num in range(combo_len):
+                demon = final_combo[demon_num]
+                temp_fusions = []
+                for fusion in demon.fusions:
+                    r = Result(demon,fusion)
+                    r.find_skill_score()    # Upon generation, find the skill score for the whole result
+                    if fusion_limit >= r.fusion_limit: # Check for fusion_limits. If the fusion_limit is higher than the result's fusion_limit, then add to the list. Otherwise discard
+                        temp_fusions.append(r)  # add to list for permutation
+                    else:
+                        del(r) # delete from memory
+                        
+                final_combo_perm.append(temp_fusions)
+            final_master.append(list(itertools.product(*final_combo_perm)))
+        logging.info("Fusion combo generation complete.")
+        
+        logging.info("List generation start...")
+        master2 = []
+        for i in final_master:
+            for y in i:
+                master2.append(y)
+        
+        
+        # After result_trees are generated, they must be checked for flags. 
+        
+        self.resulttree_list = []        
+        for i in master2:
+            rt = ResultTree(self.final_result,i)
+            # Fusion limit flag: Only add results that are under the fusion level limit
+            if fusion_limit >= rt.fusion_limit:
+                self.resulttree_list.append(rt)
+        
+        logging.info("List generation complete.")
+        
+        if len(self.resulttree_list) > 0:
+            logging.info("Result tree scoring start...")
+            
+            result_tree2 = []
+            for result_tree_instance in self.resulttree_list:  # result_tree_instance = 1 item. result_tree and result_tree2 are lists
+                result_tree_instance.score_results()
+                if self.skill_match_only:
+                    # Pure skill match flag: Only add results that fully meet the skill criteria. E.g., if not skills present at all, discard entirely
+                    # Also only applies when the skill list is populated. Otherwise, ignore, because nothing will match and it'll return blanks. 
+                    
+                    if result_tree_instance.skill_score == 1:
+                        result_tree2.append(result_tree_instance)
+                        
+            if self.skill_match_only:
+                self.resulttree_list = result_tree2[:]
+            logging.info("Result tree scoring complete.")
+            
+
+        logging.info("Finding most powerful category...")
+        rc_scores = []
+        
+        for result_tree in self.resulttree_list:
+            if result_tree.score_list not in rc_scores:
+                rc_scores.append(result_tree.score_list)
+        self.score_list = rc_scores
+        rc2 = []
+        for i in rc_scores:  # janky, not elegant scoring system to prioritize: skills, recruitable, demon num
+            rc2.append(sum([i[0]*100000,i[1]*1000,i[2]]))
+        local_max = rc2.index(max(rc2))
+        self.score_dict = dict(zip(rc2,rc_scores))
+        
+        
+        # Cleanup the dict to be sorted
+        
+        new_dict = {}
+        key_list = sorted(self.score_dict.keys())[::-1]
+        for key in key_list:
+            new_dict[key] = self.score_dict[key]
+        self.score_dict = new_dict
+        
+        
+        self.max_only_dict = rc_scores[local_max]
+                
+                
+                
+
+    def print_results(self):
+        logging.info("Results generation start...")
         # First compile stats about the results list
         
         
@@ -324,51 +491,14 @@ class ResultCluster:
         self.recruit_scores = sorted(list(set(trees_recruit_scores)))
         self.demon_scores = sorted(list(set(trees_demon_scores)))[::-1]
         
-#        logging.info("SKILL "+str(self.skill_scores))
-#        logging.info("RECRU "+str(self.recruit_scores))
-#        logging.info("DEMON "+str(self.demon_scores))
-
-        if max_only:
-            # For now, use top 2 possibilities.
-            # Also for now, ignore actually generating max from demon_scores. Although interesting to slice results this way,
-            #     actually filtering on the top two often causes no results for the 'strongest' category of recruit/skill
-            # Generating a true "max power" across all three fields seems tough................
-                        
-            if (len(self.skill_scores) >= 2):
-                max1_skill_scores = max(self.skill_scores)
-                self.skill_scores.remove(max1_skill_scores)
-                max2_skill_scores = max(self.skill_scores)
-                self.skill_scores = [max1_skill_scores, max2_skill_scores]
-            else:
-                pass
-            
-            if (len(self.recruit_scores) >= 2):
-                max1_recruit_scores = max(self.recruit_scores)
-                self.recruit_scores.remove(max1_recruit_scores)
-                max2_recruit_scores = max(self.recruit_scores)
-                self.recruit_scores = [max1_recruit_scores, max2_recruit_scores]
-            else:
-                pass
-            
-#            if (len(self.demon_scores) >= 2):
-#                max1_demon_scores = max(self.demon_scores)
-#                self.demon_scores.remove(max1_demon_scores)
-#                max2_demon_scores = max(self.demon_scores)
-#                self.demon_scores = [max1_demon_scores, max2_demon_scores]
-#            else:
-#                pass
-            
-            
-            
-            
-            
-            # Old method, true max for each category. Often reports blank because it idealistically takes the max from any slice            
-#            self.skill_scores = [max(self.skill_scores)]
-#            self.recruit_scores = [max(self.recruit_scores)]
-#            self.demon_scores = [min(self.demon_scores)]
+        if self.max_only_flag:
+            logging.info("Max only flag. Skill/recruit/demon: "+str(self.max_only_dict))
+            self.skill_scores = [self.max_only_dict[0]]
+            self.recruit_scores = [self.max_only_dict[1]]
+            self.demon_scores = [self.max_only_dict[2]]
             
         # Then print results
-        if save_only:
+        if self.save_only_flag:
             with open('output/file.txt','w',encoding='utf-8') as f:
                 f.write("")
             for skill_score_rank in self.skill_scores:
@@ -412,6 +542,7 @@ class ResultCluster:
                             for i in temp_outputs:
                                 self.output_results.append(i)
 
+            logging.info("Results generation complete.")
 
 ######################## INIT  #####################################
 #
@@ -467,147 +598,10 @@ recruitable_demons = df_bestiary[df_bestiary['recruitable'] != '[n/a]']['name'].
 
 
 
-    # Build demons, stored in demon_master
-
-demon_master = []
-for demon_lookup in df_bestiary['name'].unique().tolist():
-    # build from skills
-    skill_list = df_skills.loc[df_skills['demon_name'] == demon_lookup]['name'].unique().tolist()
-    
-    # build from bestiary
-    df = df_bestiary.loc[df_bestiary['name'] == demon_lookup]
-    if not df.empty:
-        stat_list = df.iloc[0].to_dict()  # temp dict for all demon stats
-        stat_list['skill_list'] = skill_list # add skill_list
-        demon_master.append(Demon(**stat_list)) # add new demon to master with stats & skills
-        
-
-
-
-
-
-
-
-
-
-
-
-
 
 ############### TEST AREA ######################
 
-def generate_results(target_demon_input,skills_input,fusion_level,skill_match_only,max_only):
-    logging.info("Test area start.")
-    global demon_master
-    
-    sk = skills_input
-    fusion_limit = fusion_level
-    pure_skill_match = skill_match_only
-    save_only_flag = True
-    max_only_flag = max_only
-    
-    logging.info("Scoring demons on skill list...")
-    
-    for demon in demon_master:
-        demon.find_skills(skills_input)
-        demon.find_fusions(demon_master)
-    logging.info("Scored demons on skill list.")
 
-    d = find_demon(target_demon_input,demon_master)
-
-
-    logging.info("Starting fusion combo generation...")
-    
-    
-    # Data validation/cleanup
-    final_master = []
-    if sk == ['']:
-        pure_skill_match = False
-    
-    # Default to target demon level if nothing given 
-    if type(fusion_limit) != int or fusion_limit  <= 0:
-        fusion_limit = d.lv
-    
-    
-    
-    
-    ##
-    #
-    # Probably make the below a function of a ResultCluster to generate all of this. 
-    #
-    ##
-    
-    
-    for i, final_combo in enumerate(d.fusions):
-        #logging.info("Final combo #: "+str(i)+"...")
-        final_combo_perm = []
-        combo_len = len(final_combo)
-        for demon_num in range(combo_len):
-            demon = final_combo[demon_num]
-            temp_fusions = []
-            for fusion in demon.fusions:
-                r = Result(demon,fusion)
-                r.find_skill_score()    # Upon generation, find the skill score for the whole result
-                if fusion_limit >= r.fusion_limit: # Check for fusion_limits. If the fusion_limit is higher than the result's fusion_limit, then add to the list. Otherwise discard
-                    temp_fusions.append(r)  # add to list for permutation
-                else:
-                    del(r) # delete from memory
-                    
-            final_combo_perm.append(temp_fusions)
-        final_master.append(list(itertools.product(*final_combo_perm)))
-    logging.info("Fusion combo generation complete.")
-    
-    logging.info("List generation start...")
-    master2 = []
-    for i in final_master:
-        for y in i:
-            master2.append(y)
-    
-    
-    # After result_trees are generated, they must be checked for flags. 
-    
-    result_tree = []        
-    for i in master2:
-        rt = ResultTree(d,i)
-        # Fusion limit flag: Only add results that are under the fusion level limit
-        if fusion_limit >= rt.fusion_limit:
-            result_tree.append(rt)
-    
-    # for debug only - set up one rt object
-    try:        
-        rt = result_tree[0]
-    except:
-        logging.info("No rt results. Error on debug rt creation.")
-    
-    logging.info("List generation complete.")
-    
-    if len(result_tree) > 0:
-        #result_tree = result_tree[300:300]
-        logging.info("Result tree scoring start...")
-        
-        result_tree2 = []
-        for result_tree_instance in result_tree:  # result_tree_instance = 1 item. result_tree and result_tree2 are lists
-            result_tree_instance.score_results()
-            if pure_skill_match:
-                # Pure skill match flag: Only add results that fully meet the skill criteria. E.g., if not skills present at all, discard entirely
-                # Also only applies when the skill list is populated. Otherwise, ignore, because nothing will match and it'll return blanks. 
-                
-                if result_tree_instance.skill_score == 1:
-                    result_tree2.append(result_tree_instance)
-                    
-        if pure_skill_match:
-            result_tree = result_tree2[:]
-        logging.info("Result tree scoring complete.")
-        
-        logging.info("Results generation start...")
-        
-        rc = ResultCluster(d,result_tree)
-        rc.print_results(save_only=save_only_flag,max_only=max_only_flag)
-        
-        logging.info("Results generation complete.")
-        return rc.output_results
-    else:
-        logging.info("No matches. Results not generated.")
         
         
 ####### NEED TO NOT RUN THIS & THE PICKLING FOR USE WITH FLASK        
@@ -615,9 +609,11 @@ def generate_results(target_demon_input,skills_input,fusion_level,skill_match_on
 
 if True:
     target_demon_input = 'Valkyrie'
-    skills_input = ['Agilao']
+    skills_input = ['Zanma']
     fusion_level = -1
     skill_match_only = True
-    max_only = False
+    max_only = True
             
-    results = generate_results(target_demon_input,skills_input,fusion_level,skill_match_only,max_only)
+    rc = ResultCluster(target_demon_input,skills_input,fusion_level,skill_match_only,max_only)
+    rc.generate_results()
+    rc.print_results()
