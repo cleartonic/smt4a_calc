@@ -11,7 +11,7 @@
         <form action = "http://127.0.0.1:5000" method = post>
             {{ form.csrf }}
  
-            <div class="inputtext">
+            <div class="input text">
                 {{ form.target_demon.label }}<br>
                 {{ form.target_demon }}<br><br>
                 {{ form.skill1.label }} <br>
@@ -40,7 +40,7 @@
                 {{ form.max_only }}<br>
                 {{ form.strict_filter.label }}
                 {{ form.strict_filter }}<br>
-				<input class='pure-button' type = "submit" value ="Submit"> <div class ="hideoutput"><a class="pure-button" href="#">Hide/show all output</a></div>
+				<input class='pure-button' type = "submit" value ="Submit"> <div class ="hideoutput"><a class="pure-button" href="#">Hide/show output</a></div>
                 </div>
             
             <div class='results'>
@@ -50,7 +50,7 @@
                         {% set temp_score_list = output_scores[score][0] %}
                         {% set final_str = output_scores[score][1] %}
                         {% set temp_results_trees = output_scores[score][2] %}
-                            <div class = "resulttree"><div class = 'final_result_str'><div class = 'final_str'>{{final_str}} </div> <div class = 'final_skill'>Skills: {{temp_score_list[0] }} </div><div class = 'final_recruit'>Recruitable: {{ temp_score_list[1] }}</div><div class = 'final_demon'> Demon: {{ temp_score_list[2]}} </div></div>
+                            <div class = "resulttree"><h3> {{final_str}} | Skills: {{temp_score_list[0] }} Recruitable: {{ temp_score_list[1] }} Demon: {{ temp_score_list[2]}} </h3> 
                             {% set temp_results_trees = temp_results_trees[:max_tree_results]%}
                                 <div class = "output">
                                 {% for rt in temp_results_trees %}

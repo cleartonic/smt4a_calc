@@ -1,0 +1,52 @@
+#block_container
+{
+    text-align:center;
+}
+
+
+body {
+    background-color: #000000;
+    color: #FFFFFF;
+}
+
+
+.final_result_str {
+    color: #FFFFFF;
+    font-size: 120%;
+    display:inline;
+}
+.final_str {
+    color: #BBFFFF;
+    font-size: 120%;
+    display:inline;
+}
+
+.final_skill {
+    color: #BBFFFF;
+    font-size: 120%;
+    display:inline;
+}
+.final_recruit {
+    color: #FFFFBB;
+    font-size: 120%;
+    display:inline;
+}
+.final_demon {
+    color: #FFBBFF;
+    font-size: 120%;
+    display:inline;
+}
+option{
+    background-color: #333333;
+    font: #FFFFFF;
+}
+
+select{
+    background-color: #333333;
+    font: #FFFFFF;
+}
+
+input{
+    background-color: #333333;
+    font: #FFFFFF;
+}

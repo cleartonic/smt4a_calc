@@ -5,6 +5,7 @@ from flask_wtf import FlaskForm
 from wtforms import Form, TextField, TextAreaField, validators, StringField, SubmitField, SelectField, BooleanField, IntegerField
 
 app = Flask(__name__)
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 app.config.from_object(__name__)
 app.config['SECRET_KEY'] = '7d441f37d441f29567d441f2b6176b'
   
@@ -14,6 +15,8 @@ DEMON_LIST = [(demon,demon) for demon in sorted(smt4.DEMON_RAW)]
 
 
 class Profile:
+    # Profile represents every time the user submits a form, what is entered
+    
     def __init__(self, form_data):
         for key in form_data:
             setattr(self,key,form_data[key])        
@@ -21,6 +24,11 @@ class Profile:
         if len(skill_list) > 1 and '' in skill_list:
             skill_list.remove('')
         self.skill_list = skill_list
+        
+        filter_demon_list = list(set([self.filter_demon1,self.filter_demon2,self.filter_demon3,self.filter_demon4]))
+        if len(filter_demon_list) > 1 and '' in filter_demon_list:
+            filter_demon_list.remove('')
+        self.filter_demon_list  = filter_demon_list 
 		
 class SkillForm(FlaskForm):
     skill1 = SelectField(label='Skill', choices=SKILL_LIST)
@@ -32,10 +40,17 @@ class SkillForm(FlaskForm):
     skill7 = SelectField(label='Skill', choices=SKILL_LIST)
     skill8 = SelectField(label='Skill', choices=SKILL_LIST)
     
+    filter_demon1 = SelectField(label='Filter demons:', choices=DEMON_LIST)
+    filter_demon2 = SelectField(label='Filter demons:', choices=DEMON_LIST)
+    filter_demon3 = SelectField(label='Filter demons:', choices=DEMON_LIST)
+    filter_demon4 = SelectField(label='Filter demons:', choices=DEMON_LIST)
+    
     target_demon = SelectField(label='Target demon:', choices=DEMON_LIST)
-    skill_match_only = BooleanField(label='Strict skill match only:')
-    fusion_level = IntegerField(label='Max Fusion Level')
-    max_only = BooleanField(label='Highest scoring output only:')
+    skill_match_only = BooleanField(label='Strict skill match only:',default=True)
+    strict_filter = BooleanField(label='Strict filtering on all input filter demons:')
+    fusion_level = IntegerField(label='Max Fusion Level (blank defaults to target demon level)')
+    max_tree_results = IntegerField(label='Max tree results',default=10)
+    max_only = BooleanField(label='Highest scoring output only:',default=True)
  
  
  
@@ -45,11 +60,33 @@ def hello():
 	#if form.validate():
     if request.method=='POST':
         p = Profile(form.data)
-        p.output_results = smt4.generate_results(p.target_demon, p.skill_list, p.fusion_level,p.skill_match_only,p.max_only)
-        # print(p.__dict__)
-        return render_template('test.html',form=form, output_results = p.output_results)
+        rc = smt4.ResultCluster(p.target_demon, p.skill_list, p.fusion_level,p.skill_match_only,p.max_only,p.strict_filter)
+        rc.generate_results()
+        
+        # Take score_dict, which is in: { OVERALL SCORE : [list of skill/recruit/demon] } format
+        # And convert to:
+        # { OVERALL SCORE : ( [list of skill/recruit/demon], [RT_LIST] ) } 
+        # The reason for the original OVERALL SCORE is to have the ordering of the magnitude (highest scores first)
+        # out
+        
+        
+        if rc.result_failure:
+            return render_template('test.html',form=form)
+        else:
+            if len(p.filter_demon_list) > 0 and '' not in p.filter_demon_list:
+                rc.filter_results(p.filter_demon_list)
+            output_scores = rc.find_matching_scores()
+            return render_template('test.html',form=form, output_scores = output_scores, max_tree_results = p.max_tree_results)
     else:
         return render_template('test.html',form=form)
  
+    
+@app.context_processor
+def utility_functions():
+    def print_in_console(message):
+        print(str(message))
+
+    return dict(mdebug=print_in_console)
+    
 if __name__ == "__main__":
     app.run(debug=True)

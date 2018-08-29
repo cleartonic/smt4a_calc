@@ -1,0 +1,247 @@
+img {
+  image-rendering: auto;
+  image-rendering: crisp-edges;
+}
+
+
+body {
+    background-color: #333333;
+    color: #FFFFFF;
+}
+
+@font-face {
+	font-family: 'Aero Matics';
+	src: url('../font/Aero Matics Regular.ttf');
+	}
+
+* {
+  font-family: 'Aero Matics', sans-serif;
+}	
+
+#bg {
+	width: 1280px;
+	height: 720px;
+	position: absolute;
+	overflow:hidden;
+	}
+
+	
+#notificationwrapper {
+	width: 1px; /* influenced by widthcheck() */
+	height: 720px;
+	position: absolute;
+	/* background: #002002; */
+	overflow:hidden;
+	}
+
+	
+#notifyText {
+	width: 245px;
+	height: 25px;
+	position: absolute;
+	top: 6px;
+	left: 35px;
+	font-size: 12px;
+	display: none;
+	white-space: nowrap;
+	overflow:hidden;
+	}
+	
+	
+#notifyText2 { /* this is for bits */
+	width: 245px;
+	height: 25px;
+	position: absolute;
+	top: 6px;
+	left: 65px;
+	font-size: 12px;
+	display: none;
+	white-space: nowrap;
+	overflow:hidden;
+}
+
+	
+	
+#notifyLogo {
+	width: 20px;
+	height: 20px;
+	position: absolute;
+	top: 5px;
+	left: 8px;
+	display: none;
+}
+#notifyLogoImage {
+	width: 20px;
+	height: 20px;
+	position: absolute;	
+	display: none;
+}		
+
+#clearFacial {
+	width: 20px;
+	height: 20px;
+	position: absolute;
+	display: none;
+}
+#clearFacialImage {
+	width: 20px;
+	height: 20px;
+	position: absolute;	
+	left: 250px;
+
+}		
+
+#clearRoll {
+	width: 20px;
+	height: 20px;
+	position: absolute;
+	display: none;
+}
+#clearRollImage {
+	width: 20px;
+	height: 20px;
+	position: absolute;	
+	left: 250px;
+
+}		
+#metalslime {
+	width: 100px;
+	height: 100px;
+	position: absolute;
+	display: none;	
+    opacity: 0.5;	
+	top: 80px;
+	left: 00px;
+	
+}
+#metalslimeimage {
+	width: 300px;
+	height: 300px;
+    opacity: 0.5;		
+	position: absolute;	
+
+
+}		
+
+#notificationName {
+	width: auto;
+	height: 25px;
+	position: absolute;
+	top: 4px;
+	left: 105px;
+	font-size: 12px;
+	display: none;
+	text-overflow:ellipsis;
+	overflow: hidden;	
+	}	
+#notificationMonths {
+	width: auto;
+	height: 25px;
+	position: absolute;
+	top: 6px;
+	left: 225px;
+	font-size: 12px;
+	text-align: right;
+  display: none;
+	}
+	
+#notificationMonthstext {
+	width: auto;
+	height: 25px;
+	position: absolute;
+	top: 6px;
+	left: 245px;
+	font-size: 12px;
+  display: none;
+	}
+
+	
+	
+	
+#infowrapper {
+	width: 100%;
+	height: 36px;
+	bottom: 0px;
+/* 	background: #404120; */
+	position: absolute;
+	
+	
+}	
+#infoBitdonate {
+	height: 37px;
+	width: 60px;
+	position: absolute;
+	overflow:hidden;
+/* 	background: #044170; */
+	}
+#infoBitdonateImage {
+	animation: slide1 10s;
+	height: 60px;
+	width: 60px;	
+	display: none;
+	position: absolute;
+	overflow:hidden;
+	}
+	
+		
+@keyframes slide1 {
+	0% 		{bottom: -200%;}
+	50% 		{bottom: 10%;}
+	100% 	{bottom: -200%;}
+}
+
+
+
+#infoText {
+	position: absolute;
+	top: 22%;
+	left: 40%;
+	font-size: 18px;
+	display: none;
+	overflow:hidden;
+	}
+#infoLogo {
+	width: 40px;
+	height: 40px;
+	left: 20%;
+	position: absolute;
+	display: none;
+	}
+	
+#infoLogoImage {
+	
+	width: 40px;
+	height: 40px;
+	position: absolute;	
+
+}		
+
+#alertsoff {
+	position: absolute;
+	top: 6%;
+	width: 32px;
+	height: 32px;	
+	left: 230px;
+	
+	}
+	
+#alertsoffimage {
+	
+	width: 40px;
+	height: 40px;
+	display:none;
+	position: absolute;	
+
+}	
+#lastemote {
+	position: absolute;
+	top: 10%;
+	width: 32px;
+	height: 32px;	
+	left: 10px;
+
+}
+#lastemoteimage {
+	position: absolute;
+
+}
