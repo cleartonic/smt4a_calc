@@ -1,46 +1,52 @@
 <html>
     <head>
         <title>SMTIV:A/F Reverse Calculator</title>
-        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename = 'style.css') }}">
+        <link rel="stylesheet" type="text/css" href="/static/style.css">
+        <link href='https://fonts.googleapis.com/css?family=Ropa Sans' rel='stylesheet'>
         <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.0/build/pure-min.css" integrity="sha384-nn4HPE8lTHyVtfCBi5yW9d20FjT8BJwUXyWZT9InLYax14RDjBj46LmSztkmNP9w" crossorigin="anonymous">
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-        <script src="{{ url_for('static', filename = 'js3.js') }}"></script>	
+        <script src="/static/js3.js"></script>
         <meta name="viewport" content="width=device-width, initial-scale=1">
     </head>
     <body>
         <form action = "http://127.0.0.1:5000" method = post>
             {{ form.csrf }}
  
-            <div class="inputtext">
-                {{ form.target_demon.label }}<br>
-                {{ form.target_demon }}<br><br>
-                {{ form.skill1.label }} <br>
-				{{ form.skill1 }}<br>
-				{{ form.skill2 }}<br>
-				{{ form.skill3 }}<br>
-				{{ form.skill4 }}<br>
-				{{ form.skill5 }}<br>
-				{{ form.skill6 }}<br>
-				{{ form.skill7 }}<br>
-				{{ form.skill8 }}<br>
-				<br>
-                {{ form.filter_demon1.label }}<br>
-                {{ form.filter_demon1 }}<br>
-                {{ form.filter_demon2 }}<br>
-                {{ form.filter_demon3 }}<br>
-                {{ form.filter_demon4 }}<br>
-				<br>
-                {{ form.fusion_level.label }} <br>
-                {{ form.fusion_level }}<br>
-                {{ form.max_tree_results.label }} <br>
-                {{ form.max_tree_results }}<br>
-                {{ form.skill_match_only.label }}
-                {{ form.skill_match_only }}<br>
-                {{ form.max_only.label }}
-                {{ form.max_only }}<br>
-                {{ form.strict_filter.label }}
-                {{ form.strict_filter }}<br>
-				<input class='pure-button' type = "submit" value ="Submit"> <div class ="hideoutput"><a class="pure-button" href="#">Hide/show all output</a></div>
+            <div class="input_text">
+                <div class = 'form_column_1'>
+                    {{ form.target_demon.label }}<br>
+                    {{ form.target_demon }}<br><br>
+                    {{ form.skill1.label }} <br>
+                    {{ form.skill1 }}<br>
+                    {{ form.skill2 }}<br>
+                    {{ form.skill3 }}<br>
+                    {{ form.skill4 }}<br>
+                    {{ form.skill5 }}<br>
+                    {{ form.skill6 }}<br>
+                    {{ form.skill7 }}<br>
+                    {{ form.skill8 }}<br>
+                 </div>
+                <div class = 'form_column_2'>
+                    {{ form.filter_demon1.label }}<br>
+                    {{ form.filter_demon1 }}<br>
+                    {{ form.filter_demon2 }}<br>
+                    {{ form.filter_demon3 }}<br>
+                    {{ form.filter_demon4 }}<br>
+                    <br>
+                    {{ form.fusion_level.label }} <br>
+                    {{ form.fusion_level }}<br>
+                    {{ form.max_tree_results.label }} <br>
+                    {{ form.max_tree_results }}<br>
+                    {{ form.skill_match_only.label }}
+                    {{ form.skill_match_only }}<br>
+                    {{ form.max_only.label }}
+                    {{ form.max_only }}<br>
+                    {{ form.strict_filter.label }}
+                    {{ form.strict_filter }}<br>
+                </div> </div>
+                <div class = "submission_area">
+                    <div class = "button_area"><input class='pure-button' type = "submit" value ="Submit"></input></div>
+                    <div class = "button_area"><div class ="hideoutput"><a class="pure-button" href="#">Hide/show all output</a></div></div>
                 </div>
             
             <div class='results'>
@@ -50,18 +56,37 @@
                         {% set temp_score_list = output_scores[score][0] %}
                         {% set final_str = output_scores[score][1] %}
                         {% set temp_results_trees = output_scores[score][2] %}
-                            <div class = "resulttree"><div class = 'final_result_str'><div class = 'final_str'>{{final_str}} </div> <div class = 'final_skill'>Skills: {{temp_score_list[0] }} </div><div class = 'final_recruit'>Recruitable: {{ temp_score_list[1] }}</div><div class = 'final_demon'> Demon: {{ temp_score_list[2]}} </div></div>
+                        
+                        
+                        
+                        <div class="resulttree">
+                          <div class='final_result_boxcontainer'>
+                            <div class = 'plus_icon'>+</div>
+                            <div class='final_skill score_box'>Skill<div class = 'result_div'>
+                            {{temp_score_list[0]}}% </div></div>
+                            <div class='final_recruit score_box'>Recruit<div class = 'result_div'>{{temp_score_list[1]}}%</div></div>
+                            <div class='final_demon score_box'>Demon<div class = 'result_div'>{{temp_score_list[2]}}</div></div> <div class='final_str'>{{final_str}} </div> </div>
+
                             {% set temp_results_trees = temp_results_trees[:max_tree_results]%}
-                                <div class = "output">
+                          <div class="output">
+                                <div class = 'result_seperator'> </div>
                                 {% for rt in temp_results_trees %}
-                                    {% for output in rt.output_str %}
-                                         <p> {{output}} </p>
-                                     {% endfor %}
-                                        <p> ----------- </p>
-                              {% endfor %}
-                                </div>
-                           </div>
-                  {% endfor %}
+                                <div class="resulttree_container">
+                                    {% for r in rt.results_list %}  
+                                        <div class ="outputline_container"> 
+                                        <div class = "demon_box"> {{r.final_result.name}} <div class = 'demon_skills'> {{r.final_result.matching_skills_str }}</div></div>  <div class = 'operator'>→</div>
+                                        
+                                        {% for d in r.demon_list %}
+                                            <div class = "demon_box"> {{d.name_output}} <div class = 'demon_skills'>{{d.matching_skills_str}} </div></div>
+                                        {% endfor %}
+                                        </div>
+                                    {% endfor %} 
+                                   <div class = 'result_seperator'> </div>
+                                   </div>
+                               {% endfor %}
+                          </div>
+                        </div>       
+                    {% endfor %}
             </div>
         </form>
     </body>

@@ -1,52 +1,151 @@
-#block_container
-{
-    text-align:center;
-}
-
-
 body {
-    background-color: #000000;
-    color: #FFFFFF;
+  font-family: 'Ropa Sans';font-size: 18px;
+  background-color: #000000;
+  color: #FFFFFF;
+}
+
+.final_result_boxcontainer {
+  font-size: 100%;
+  outline: 2px solid #444444;
+  line-height: 25px;
+  display: flex;
+  flex-wrap: nowrap;
+  text-align: center;
+
 }
 
 
-.final_result_str {
-    color: #FFFFFF;
-    font-size: 120%;
-    display:inline;
+.input_text {
+  display: flex;
+  flex-wrap: nowrap;
+  text-align: left;
+}
+
+.form_column_1 {
+
+padding : 50px 20px;
+}
+
+.form_column_2 {
+
+padding: 50px 20px;
+}
+.results{ 
+padding: 5px 20px;
+}
+.submission_area {
+  padding: 5px 20px;
+  display: flex;
+  flex-wrap: nowrap;
+}
+.button_area {
+    padding: 5px 5px;
+}
+
+.score_box {
+  font-size: 110%;
+  /* outline: 2px solid #444444; */
+  width: 75px;
+  margin: 0px;
+}
+
+.result_seperator {
+    background-color: #333333;
+    height:5px;
 }
 .final_str {
-    color: #BBFFFF;
-    font-size: 120%;
-    display:inline;
+  font-size: 110%;
+  /* outline: 2px dashed green; */
+  align-self: center;
+  position:relative;
+  left:10px;
 }
 
-.final_skill {
-    color: #BBFFFF;
-    font-size: 120%;
-    display:inline;
+.resulttree_container {
+  padding: 0 20px;
 }
-.final_recruit {
-    color: #FFFFBB;
-    font-size: 120%;
-    display:inline;
-}
-.final_demon {
-    color: #FFBBFF;
-    font-size: 120%;
-    display:inline;
-}
-option{
-    background-color: #333333;
-    font: #FFFFFF;
+.outputline_container {
+  font-size: 100%;
+  /* outline: 2px dashed yellow; */
+  line-height: 25px;
+  display: flex;
+  flex-wrap: nowrap;
+  text-align: center;
 }
 
-select{
-    background-color: #333333;
-    font: #FFFFFF;
+.plus_icon {
+    font-size: 200%;
+    padding: 15px 0;
+    left: 10px;
+    width: 30px;
 }
 
-input{
-    background-color: #333333;
-    font: #FFFFFF;
+.operator {
+  /* outline: 2px dashed pink; */
+  height: inherit;
+  color: white;
+  padding: 20px 0; 
+}
+
+.demon_box {
+  font-size: 100%;
+  /* outline: 2px dashed red; */
+  outline: 2px solid #444444;
+  width: 150px;
+  margin: 10px;
+}
+
+.demon_skills {
+  color: #BBFFFF;
+  /* outline: 2px dashed red; */
+  width: 150px;
+  
+}
+
+/* .final_str { */
+
+/* color: #BBFFFF; */
+
+/* font-size: 120%; */
+
+/* outline: 5px dashed blue; */
+
+/* width: 30px; */
+
+/* display:inline; */
+
+/* } */
+
+/* .final_skill { */
+
+/* color: #BBFFFF; */
+
+/* font-size: 120%; */
+
+/* outline: 5px dashed blue; */
+
+/* display:inline; */
+
+/* } */
+
+
+/* .final_demon { */
+/* color: #FFBBFF; */
+/* font-size: 120%; */
+/* display:inline; */
+/* } */
+
+option {
+  background-color: #333333;
+  font: #FFFFFF;
+}
+
+select {
+  background-color: #333333;
+  font: #FFFFFF;
+}
+
+input {
+  background-color: #333333;
+  font: #FFFFFF;
 }

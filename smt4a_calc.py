@@ -171,8 +171,19 @@ class Demon:  #['race', 'lv', 'name', 'hp', 'mp', 'st', 'dx', 'ma', 'ag', 'lu', 
         self.skill_dict = dict(zip(skill_list,[0] * len(skill_list))) # Creates a dictionary to store each skill passed and whether its been met or not
         for skill in skill_list:
             if skill in self.skill_list:
-                self.demon_qualifier = self.demon_qualifier + " ("+skill+")"
+                # self.demon_qualifier = self.demon_qualifier + " ("+skill+")" TEMPORARILY REMOVING THIS FOR CSS 
                 self.skill_dict[skill] = 1
+        self.matching_skills = []
+        for skill in self.skill_dict:
+            if self.skill_dict[skill] > 0:
+                self.matching_skills.append(skill)
+                
+        self.matching_skills_str = ''
+        for skill in self.matching_skills:
+            self.matching_skills_str = self.matching_skills_str.join((skill+" "))
+        if self.matching_skills_str == '':
+            self.matching_skills_str = '(no skill)'
+            
         self.update_name()
     def update_name(self):
         self.name_output = self.name + self.demon_qualifier
@@ -260,8 +271,8 @@ class Result:
                 logging.info(self.demon_list_str, self.demon_num)
 
             self.skill_output = req_str
-            self.skill_score = self.skill_score_num / self.skill_score_max
-            self.recruit_score = self.recruit_score_num / self.recruit_score_max
+            self.skill_score = int(round(self.skill_score_num / self.skill_score_max,2) * 100)
+            self.recruit_score = int(round(self.recruit_score_num / self.recruit_score_max,2) * 100)
             self.scored = True
             
         
@@ -344,7 +355,7 @@ class ResultTree:
         self.skill_dict_score = find_scores(skill_dict_compile)
         self.skill_score_num = sum(list(self.skill_dict_score.values()))
         self.skill_score_max = len(self.skill_dict_score.values())
-        self.skill_score =  self.skill_score_num / self.skill_score_max
+        self.skill_score =  int(round(self.skill_score_num / self.skill_score_max,2)*100)
         self.scored = True
         
         # Check recruitable:
@@ -356,7 +367,7 @@ class ResultTree:
                 d_list.append(d.name)
         self.recruit_score_max = len(d_list)
         self.recruit_score_num = r_num
-        self.recruit_score = self.recruit_score_num / self.recruit_score_max
+        self.recruit_score = int(round(self.recruit_score_num / self.recruit_score_max,2)*100)
         
         # 
         self.score_list = [self.skill_score,self.recruit_score,self.demon_score]
@@ -726,11 +737,11 @@ recruitable_demons = df_bestiary[df_bestiary['recruitable'] != '[n/a]']['name'].
         
 
 if False:
-    target_demon_input = 'Krishna'
-    skills_input = ['']
+    target_demon_input = 'Pele'
+    skills_input = ['Dia']
     fusion_level = -1
-    skill_match_only = False
-    max_only = False
+    skill_match_only = True
+    max_only = True
     strict_filter = False
             
     rc = ResultCluster(target_demon_input,skills_input,fusion_level,skill_match_only,max_only,strict_filter)
