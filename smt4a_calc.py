@@ -10,15 +10,12 @@ import numpy as np
 import pickle
 import itertools
 import logging
-import coloredlogs
 
 logging.info("Script start.")
 
-coloredlogs.install()
-
 pd.options.mode.chained_assignment = None
 
-pickle_check = False
+pickle_check = True
 
 
 ### TO DO
@@ -417,8 +414,6 @@ class ResultCluster:
         
     def generate_results(self):
         logging.info("Cluster generation start.")
-        global demon_master
-        
         fusion_limit = self.fusion_level
         
         logging.info("Scoring demons on skill list...")
@@ -583,15 +578,7 @@ class ResultCluster:
                     num = num + 1
         # 
         return x
-    
-        # OLD CODE
-        
-#        matching_list = []
-#        for rt in self.resulttree_list:
-#            # logging.info("RT SCORE LIST",rt.score_list," SCORE INPUT",score_input)
-#            if rt.score_list == score_input:
-#                matching_list.append(rt)
-#        return matching_list
+
                 
 
     def print_results(self):
@@ -685,7 +672,7 @@ DEMON_RAW = ["","Katakirauwa","Slime","Goblin","Sudama","Centaur","Caladrius","L
 
 logging.info("Init start.")
 
-if True:                
+if True:
     # Load tables
     df_skills = pd.read_excel('data/skills.xlsx')
     df_fusion = pd.read_excel('data/fusion.xlsx')
@@ -711,12 +698,12 @@ if True:
         # skills_master.append(Skill(skill_name, skill_type, mp, desc, target, rank, demon_list))
         skills_master.append(Skill(skill_name=skill_name, skill_type=skill_type, mp=mp, desc=desc, target=target, rank=rank, demon_list=demon_list))
         
-    if pickle_check == True:
+    if pickle_check:
         pickle.dump( skills_master, open( "data/skills.p", "wb" ) )
         pickle.dump( [df_skills,df_fusion,df_bestiary], open( "data/tables.p", "wb" ) )
     
 else:
-    if pickle_check == True:
+    if pickle_check:
         skills_master = pickle.load( open( "data/skills.p", "rb" ) )
         [df_skills,df_fusion,df_bestiary] = pickle.load( open( "data/tables.p", "rb" ) )
 
@@ -735,10 +722,9 @@ recruitable_demons = df_bestiary[df_bestiary['recruitable'] != '[n/a]']['name'].
         
 ####### NEED TO NOT RUN THIS & THE PICKLING FOR USE WITH FLASK        
         
-
-if False:
+if True:
     target_demon_input = 'Pele'
-    skills_input = ['Dia']
+    skills_input = ['']
     fusion_level = -1
     skill_match_only = True
     max_only = True
@@ -747,3 +733,4 @@ if False:
     rc = ResultCluster(target_demon_input,skills_input,fusion_level,skill_match_only,max_only,strict_filter)
     rc.generate_results()
     #rc.print_results()
+

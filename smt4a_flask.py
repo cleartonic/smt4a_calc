@@ -4,10 +4,10 @@ from flask import Flask, render_template, flash, request
 from flask_wtf import FlaskForm
 from wtforms import Form, TextField, TextAreaField, validators, StringField, SubmitField, SelectField, BooleanField, IntegerField
 
-app = Flask(__name__)
-app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
-app.config.from_object(__name__)
-app.config['SECRET_KEY'] = '7d441f37d441f29567d441f2b6176b'
+application = Flask(__name__)
+application.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
+application.config.from_object(__name__)
+application.config['SECRET_KEY'] = '7d441f37d441f29567d441f2b6176b'
   
 SKILL_LIST = [(skill,skill) for skill in smt4.SKILL_RAW]
 DEMON_LIST = [(demon,demon) for demon in sorted(smt4.DEMON_RAW)]
@@ -54,7 +54,7 @@ class SkillForm(FlaskForm):
  
  
  
-@app.route("/", methods=['GET', 'POST'])
+@application.route("/", methods=['GET', 'POST'])
 def hello():
     form = SkillForm()
 	#if form.validate():
@@ -81,7 +81,7 @@ def hello():
         return render_template('test.html',form=form)
  
     
-@app.context_processor
+@application.context_processor
 def utility_functions():
     def print_in_console(message):
         print(str(message))
@@ -89,4 +89,4 @@ def utility_functions():
     return dict(mdebug=print_in_console)
     
 if __name__ == "__main__":
-    app.run(debug=True)
+    application.run(debug=True)
