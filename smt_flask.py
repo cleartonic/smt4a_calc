@@ -1,4 +1,4 @@
-import smt4a_calc as smt4
+import smt_calc as smt
 
 from flask import Flask, render_template, flash, request
 from flask_wtf import FlaskForm
@@ -9,8 +9,8 @@ application.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 application.config.from_object(__name__)
 application.config['SECRET_KEY'] = '7d441f37d441f29567d441f2b6176b'
   
-SKILL_LIST = [(skill,skill) for skill in smt4.SKILL_RAW]
-DEMON_LIST = [(demon,demon) for demon in sorted(smt4.DEMON_RAW)]
+SKILL_LIST = [(skill,skill) for skill in smt.SKILL_RAW]
+DEMON_LIST = [(demon,demon) for demon in sorted(smt.DEMON_RAW)]
 
 
 
@@ -60,7 +60,7 @@ def hello():
 	#if form.validate():
     if request.method=='POST':
         p = Profile(form.data)
-        rc = smt4.ResultCluster(p.target_demon, p.skill_list, p.fusion_level,p.skill_match_only,p.max_only,p.strict_filter)
+        rc = smt.ResultCluster(p.target_demon, p.skill_list, p.fusion_level,p.skill_match_only,p.max_only,p.strict_filter)
         rc.generate_results()
         
         # Take score_dict, which is in: { OVERALL SCORE : [list of skill/recruit/demon] } format
