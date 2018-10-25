@@ -20,10 +20,9 @@ pickle_check = True
 
 ### TO DO
 #
-# 1) visual representation of all output strings in html
-# 2) filtering of outputs already generated
-# 
-# Finish building database, somehow figure out how to load special fusions into objects and save (diff format than df_fusions)
+# Implement using np.in1d for dataframe filtering 
+#
+# df_temp = df.loc[np.in1d(df['seed_clean'], [seed])]
 #
 ###
 
@@ -40,11 +39,6 @@ pickle_check = True
 #            print(rt.final_str)
             
 
-# Build out a function that takes a ResultCluster's massive resulttree_list
-# And sorts by both score (storing the score list) and by all the result_tree's final demons
-# I.e -> Hekatoncheires → [Rangda x Loki] = All the [Rangda x Loki] together under the score_list [1,1,4
-
-# Then fix max_only flag for output
             
 
 ######################## FUNCTIONS #####################################
