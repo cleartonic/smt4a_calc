@@ -11,9 +11,20 @@ body {
   display: flex;
   flex-wrap: nowrap;
   text-align: center;
+  cursor: pointer;
 
 }
 
+
+.title_text {
+  padding : 10px 20px;
+  font-size: 150%;
+}
+
+.sub_text {
+  padding : 0px 20px;
+  font-size: 110%;
+}
 
 .input_text {
   display: flex;

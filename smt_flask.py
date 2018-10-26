@@ -71,12 +71,12 @@ def hello():
         
         
         if rc.result_failure:
-            return render_template('test.html',form=form)
+            return render_template('index.html',form=form)
         else:
             output_scores = rc.find_matching_scores()
-            return render_template('test.html',form=form, output_scores = output_scores, max_tree_results = p.max_tree_results)
+            return render_template('index.html',form=form, output_scores = output_scores, max_tree_results = p.max_tree_results)
     else:
-        return render_template('test.html',form=form)
+        return render_template('index.html',form=form)
  
     
 @application.context_processor

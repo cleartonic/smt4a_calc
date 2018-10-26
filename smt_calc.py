@@ -8,6 +8,7 @@ Created on Mon Aug 13 10:09:22 2018
 import pandas as pd
 import numpy as np
 import pickle
+import time
 import itertools
 import logging
 #logging.basicConfig(level=logging.INFO,format='%(asctime)s %(levelname)-8s %(message)s', datefmt='%m-%d %H:%M:%S')
@@ -454,8 +455,10 @@ class ResultCluster:
             demon.find_skills(self.skills_input)
             demon.find_fusions(self.demon_master,self.fusion_level,self.final_result.lv)  #Passing the FINAL RESULT'S LEVEL as the filter. This will pass all the way down to ALL demon fusions
         logging.info("Scored demons on skill list.")
+        time.sleep(2)
         logging.info("Starting fusion combo generation...")
-        
+        time.sleep(2)
+
         final_master = []
         
         # Cleanup skill_match_only to properly reflect if skills are being matched
@@ -466,7 +469,7 @@ class ResultCluster:
         if type(fusion_limit) != int or fusion_limit  <= 0:
             fusion_limit = self.final_result.lv
 
-        
+    
         for i, final_combo in enumerate(self.final_result.fusions):
             final_combo_perm = []
             combo_len = len(final_combo)
@@ -482,7 +485,24 @@ class ResultCluster:
                         del(r) # delete from memory
                         
                 final_combo_perm.append(temp_fusions)
+            logging.debug("Generated fusion combo list.")
+            time.sleep(2)
+            logging.debug("Creating all combinations to master...")
+            #
+            #
+            #
+            # WORK ON THIS LINE
+            #
+            #
             final_master.append(list(itertools.product(*final_combo_perm)))
+            #
+            #
+            #
+            #
+            #
+            #
+            #
+            #
         logging.info("Fusion combo generation complete.")
         
         logging.info("List generation start...")
@@ -737,7 +757,7 @@ class ResultCluster:
 ########################################################################
 
 
-SKILL_RAW = ["","5.67 Billion Hands","Acid Breath","Adaptive Tactics","Agi","Agidyne","Agilao","Akasha Arts","Alluring Banter","Ally Counter","Ally Retaliate","Almighty Pleroma","Amrita","Andalusia","Antichthon","Attack Knowhow","Axel Claw","Babylon Goblet","Bad Company","Beastly Reaction","Berserker God","Bind Voice","Binding Claw","Blade of Terror","Blank Bullet","Blast Arrow","Blight","Blink of Death","Blood Ritual","Bloody Glee","Bouncing Claw","Breath","Bufu","Bufudyne","Bufula","Chakra Walk","Charge","Chariot","Cold World","Combat Tara","Concentrate","Cough","Counter","Critical Eye","Critical Wave","Damascus Claw","Dance of Mara","Dark Grudge","Dark Pierce","Dark Pleroma","Dark Sword","Dazzle Ray","Deadly Wind","Death Lust","Death's Door","Debilitate","Dekaja","Dekunda","Desperate Hit","Dia","Diarahan","Diarama","Die for Me!","Doping","Dormina","Draconic Reaction","Drain Dark","Drain Elec","Drain Fire","Drain Force","Drain Gun","Drain Ice","Drain Light","Drain Phys","Dream Fist","Dream Needle","Dream Raga","Earthquake","Eat Whole","Elec Pierce","Elec Pleroma","Endure","Enduring Cheer","Enduring Soul","Energy Drain","Enlightenment","Estoma","Eternal Rest","Evil Melody","Evil Shine","Fang Breaker","Fatal Sword","Fear Darkness","Fire Breath","Fire of Lethargy","Fire of Sinai","Fire Pierce","Fire Pleroma","Floral Gust","Fog Breath","Force Pierce","Force Pleroma","Frenzied Chomp","Glacial Blast","God's Bow","Gram Slice","Grand Tack","Great Logos","Growing Hate","Gun Pierce","Gun Pleroma","Gungnir","Hades Blast","Hama","Hamaon","Hard Worker","Haunting Rhapsody","Head Crush","Heal Pleroma","Healing Knowhow","Heat Wave","Heaven's Bow","Hell Thrust","Hellish Brand","Hellish Mask","High Dark Pleroma","High Elec Pleroma","High Fire Pleroma","High Force Pleroma","High Gun Pleroma","High Heal Pleroma","High Ice Pleroma","High Light Pleroma","High Phys Pleroma","Holy Wrath","Ice Age","Ice Breath","Ice Pierce","Ice Pleroma","Imposing Stance","Infernal Hail","Invitation","Iron Judgment","Javelin Rain","Judgment","Judgment Light","King Bufula","Life Aid","Life Bonus","Life Drain","Life Gain","Life Surge","Light Devourer","Light Life Aid","Light Mana Aid","Light Pierce","Light Pleroma","Loyalty Slash","Lullaby","Lunge","Luster Candy","Mabufu","Mabufudyne","Mabufula","Madness Nails","Madness Needle","Magaon","Magic Torrent","Mahama","Mahamaon","Makajam","Makajamaon","Makakaja","Makarabreak","Makarakarn","Mamudo","Mamudoon","Mana Aid","Mana Bonus","Mana Gain","Mana Surge","Maragi","Maragidyne","Maragion","Marin Karin","Mazan","Mazandyne","Mazanma","Mazio","Maziodyne","Mazionga","Me Patra","Media","Mediarahan","Mediarama","Megaton Press","Megiddo Ark","Megido","Megidola","Megidolaon","Mist Rush","Mortal Jihad","Mudo","Mudoon","Myriad Arrows","Needle Shot","Needlestorm","Nihil Claw","Null Dark","Null Elec","Null Fire","Null Force","Null Gun","Null Ice","Null Light","Null Mind","Null Nerve","Null Phys","Oni-Kagura","Pandemic Bomb","Panic Voice","Patra","Pestilence","Phys Pierce","Phys Pleroma","Poisma","Poison Breath","Poison Claw","Posumudi","Power Punch","Pulinpa","Purple Smoke","Raging Blizzard","Raging Hellfire","Raging Lightning","Raging Tempest","Ragnarok","Rakukaja","Rakunda","Rapid Needle","Recarm","Recarmdra","Rending Claws","Repel Dark","Repel Elec","Repel Fire","Repel Force","Repel Gun","Repel Ice","Repel Light","Repel Phys","Resist Dark","Resist Elec","Resist Fire","Resist Force","Resist Gun","Resist Ice","Resist Light","Resist Phys","Retaliate","Riot Gun","Ruinous Brand","Sabbatma","Salvation","Samarecarm","Scratch Dance","Sea of Chaos","Self-Righteous Vow","Severe Judgment","Sexy Dance","Shibaboo","Shivering Taboo","Shock","Silent Prayer","Smile Charge","Snake's Fangs","Soul Divide","Soul Drain","Spirit Drain","Spring of Life","Stun Needle","Stun Needles","Sukukaja","Sukunda","Tarukaja","Tarunda","Tathlum Shot","Taunt","Tetanus Cut","Tetrabreak","Tetraja","Tetrakarn","Thunder Gods","Thunder Reign","Titanomachia","Toxic Sting","Trafuri","Trisagion","True Zandyne","True Ziodyne","Vengeful Thunder","Venomous Raga","Victory Cry","War Cry","Warding Shout","Will of Flame","Will of Frost","Will of Thunder","Will of Wind","Wind Breath","Workaholic","Zan","Zandyne","Zanma","Zio","Ziodyne","Zionga"]
+SKILL_RAW = ["","Acid Breath","Agi","Agidyne","Agilao","Akasha Arts","Ally Counter","Ally Retaliate","Almighty Pleroma","Amrita","Antichthon","Attack Knowhow","Axel Claw","Bad Company","Beastly Reaction","Berserker God","Bind Voice","Binding Claw","Blast Arrow","Blight","Blood Ritual","Bloody Glee","Bouncing Claw","Bufu","Bufudyne","Bufula","Chakra Walk","Charge","Cold World","Concentrate","Cough","Counter","Critical Eye","Critical Wave","Damascus Claw","Dark Pierce","Dark Pleroma","Dark Sword","Deadly Wind","Death's Door","Debilitate","Dekaja","Dekunda","Dia","Diarahan","Diarama","Doping","Dormina","Draconic Reaction","Drain Dark","Drain Elec","Drain Fire","Drain Force","Drain Gun","Drain Ice","Drain Light","Drain Phys","Dream Fist","Dream Needle","Earthquake","Eat Whole","Elec Pierce","Elec Pleroma","Endure","Enduring Soul","Energy Drain","Estoma","Eternal Rest","Fang Breaker","Fatal Sword","Fire Breath","Fire Pierce","Fire Pleroma","Floral Gust","Fog Breath","Force Pierce","Force Pleroma","Frenzied Chomp","Glacial Blast","Gram Slice","Grand Tack","Great Logos","Gun Pierce","Gun Pleroma","Hades Blast","Hama","Hamaon","Hard Worker","Head Crush","Heal Pleroma","Healing Knowhow","Heat Wave","Heaven's Bow","Hell Thrust","Hellish Mask","High Dark Pleroma","High Elec Pleroma","High Fire Pleroma","High Force Pleroma","High Gun Pleroma","High Heal Pleroma","High Ice Pleroma","High Light Pleroma","High Phys Pleroma","Holy Wrath","Ice Age","Ice Breath","Ice Pierce","Ice Pleroma","Imposing Stance","Invitation","Javelin Rain","Judgment","Judgment Light","Life Aid","Life Bonus","Life Drain","Life Gain","Life Surge","Light Life Aid","Light Mana Aid","Light Pierce","Light Pleroma","Lullaby","Lunge","Luster Candy","Mabufu","Mabufudyne","Mabufula","Madness Nails","Madness Needle","Magaon","Mahama","Mahamaon","Makajam","Makajamaon","Makakaja", "Makarabreak","Makarakarn","Mamudo","Mamudoon","Mana Aid","Mana Bonus","Mana Gain","Mana Surge","Maragi","Maragidyne","Maragion","Marin Karin","Mazan","Mazandyne","Mazanma","Mazio","Maziodyne","Mazionga","Me Patra","Media","Mediarahan","Mediarama","Megaton Press","Megido","Megidola","Megidolaon","Mist Rush","Mortal Jihad","Mudo","Mudoon","Myriad Arrows","Needle Shot","Nihil Claw","Null Dark","Null Elec","Null Fire","Null Force","Null Gun","Null Ice","Null Light","Null Mind","Null Nerve","Null Phys","Oni-Kagura","Pandemic Bomb","Panic Voice","Patra","Phys Pierce","Phys Pleroma","Poisma","Poison Breath","Poison Claw","Posumudi","Power Punch","Pulinpa","Purple Smoke","Ragnarok","Rakukaja","Rakunda","Rapid Needle","Recarm","Recarmdra","Repel Dark","Repel Elec","Repel Fire","Repel Force","Repel Gun","Repel Ice","Repel Light","Repel Phys","Resist Dark","Resist Elec","Resist Fire","Resist Force","Resist Gun","Resist Ice","Resist Light","Resist Phys","Retaliate","Riot Gun","Ruinous Brand","Sabbatma","Salvation","Samarecarm","Scratch Dance","Sea of Chaos","Sexy Dance","Shibaboo","Shock","Silent Prayer","Smile Charge","Spirit Drain","Spring of Life","Stun Needle","Stun Needles","Sukukaja","Sukunda","Tarukaja","Tarunda","Tathlum Shot","Taunt","Tetanus Cut","Tetrabreak","Tetraja","Tetrakarn","Thunder Gods","Thunder Reign","Titanomachia","Toxic Sting","Trafuri","Trisagion","Victory Cry","War Cry","Will of Flame","Will of Frost","Will of Thunder","Will of Wind","Wind Breath","Workaholic","Zan","Zandyne","Zanma","Zio","Ziodyne","Zionga"]
 
 DEMON_RAW = ["","Katakirauwa","Slime","Goblin","Sudama","Centaur","Caladrius","Legion","Mandrake","Decarabia","Onmoraki","Fuxi","Fomorian","Kabuso","Nadja","Strigoii","Pele","Garrote","Jack the Ripper","Porewit","Erthys","Dwarf","Gremlin","Vodyanik","Zhu Tun She","Bilwis","Leanan Sidhe","Mamedanuki","Pixie","Hamsa","Angel","Dybbuk","Hooligan","Kaso","Sandman","Fortuna","Chagrin","Mothman","Preta","Shan Xiao","Aeros","Agathion","Hua Po","Moh Shuvuu","Napaea","Melchom","Heqet","Makara","Oni","Tam Lin","Shiisaa","Morax","Spriggan","Toubyou","Suparna","Apsaras","Mermaid","Daphne","Aquans","Gu Huo Niao","Ippon-Datara","Koppa Tengu","Knocker","Peallaidh","Strix","Zombie Cop","Hathor","Archangel","Apis","Ictinike","Mokoi","Obariyon","Dzelarhons","Azumi","Itsumade","Naga","Poltergeist","Flaemis","Bifrons","Inugami","Jack Frost","Patrimpas","Mithras","Take-Minakata","Bai Suzhen","Chupacabra","Ubu","Ame no Uzume","Kwancha","Lham Dearg","Night Stalker","Tangata Manu","Kamapua'a","Incubus","Mou-Ryo","Nata Taishi","Nozuchi","Shikome","Phoenix","Ogun","Gnome","Halphas","Karasu Tengu","Pabilsag","Parvati","Camazotz","Baphomet","Momunofu","Pyro Jack","Quicksilver","Principality","Chironnupu","Horkos","Jueyuan","Senri","Stonka","Sedna","Kanbari","Gucumatz","Kuda","Tattooed Man","Sylph","Baldur","Basilisk","Kikimora","Vouivre","Narcissus","High Pixie","Yurlungur","Dis","Myrmecolion","Qing Niugai","Thoth","Okuninushi","Hairy Jack","King Frost","Tuofei","Wendigo","Yuki Jyorou","Tsuchigumo","Inferno","Kelpie","Skogsra","Zhen","Ares","Undine","Churel","Ose","Yamawaro","Brigid","Power","Makami","Lilim","Raijuu","Vidofnir","Mayahuel","Inti","Sukuna-Hikona","Okiku-Mushi","Corpses","Clotho","Harpy","Nekomata","Setanta","Hariti","Yoshitsune","Salamander","Balor","Kikuri-Hime","Tonatiuh","Mad Gasser","Mishaguji","Titan","Yomotsu-Ikusa","Enku","Hare of Inaba","Orias","Rakshasa","Shiwanna","Wicker Man","Medusa","Kaiwan","Kingu","Nue","Scathach","Tlaloc","Prometheus","Kaiming Shou","Black Frost","Kushinada-Hime","Gryphon","Diana","Dionysus","Lachesis","Virtue","Zaccoum","Thunderbird","Frost Ace","Jeanne D'Arc","Gurr","Asura","Hel","Kin-Ki","Kurama Tengu","Valkyrie","Ishtar","Kukunochi","Airavata","Arachne","Silky","Macabre","Manticore","Ogre","Patriot","Succubus","Chimera","Tlaltecuhtli","Atropos","Nebiros","Pachacamac","Ouroboros","Illuyanka","Mushussu","Rukh","Lord Nandou","Alraune","Hsing-Hsing","Sarasvati","Xiuhtecuhtli","Lanling Wang","Hitokoto-Nushi","Alice","Anzu","Fuu-Ki","Ghoul","Chernobog","Zhong Kui","Futotama","Cu Chulainn","Grendel","Orcus","Pallas Athena","Orochi","Asherah","Dominion","Yatagarasu","Catoblepas","Orthrus","Vivian","Osiris","Ukano Mitama","Dantalian","Wild Hunt","Lailah","Haoma","Pisaca","Sui-Ki","Zouchouten","Take-Mikazuchi","Sleipnir","Tiamat","Zhu Yin","Hagen","Da Peng","Kresnik","Taraka","Tlazolteotl","Wu Kong","Arahabaki","Persephone","Loki","Dormarth","Gemori","Lorelei","Taotie","Ometeotl","Isis","Aramisaki","Cabracan","Anubis","Gui Xian","Koumokuten","Kinmamon","Niddhoggr","Victor","Long","Gogmagog","Jarilo","Master Therion","Queen Mab","Baihu","Siegfried","Girimehkala","Peri","Throne","Anat","Feng Huang","Abaddon","Dakini","Guedhe","Murmur","Oberon","Ammut","Berserker","Taowu","Yggdrasil","Jikokuten","Oumitsunu","Huoniao","Ym","Beiji-Weng","Black Maria","Hanuman","Kudlak","Pendragon","Mahamayuri","Quetzalcoatl","Kanseiteikun","Alciel","Israfel","Barong","Adramelech","Hekatoncheires","Rangda","Norn","Azazel","Barbatos","Cerberus","Fenrir","Titania","Bishamonten","Belial","Erlkonig","Hresvelgr","Python","Cernunnos","Cherub","Sphinx","Yaksha","Garuda","Kama","Ganesha","Heimdall","Lucifuge","Pales","Skadi","Shax","Attis","Rama","Vetala","Hachiman","Marishiten","Fafnir","Kali","Tzitzimitl","Demonee-Ho","Samyaza","Ixtab","Azrael","Lakshmi","Tenkai","Maya","Kartikeya","Huang Long","Ongyo-Ki","Baal","Xi Wangmu","Amaterasu","Beelzebub","Seth","Thor","Kangiten","Tokisada","Nergal","Surt","Kazfiel","Izanami","Apsu","David","Tezcatlipoca","Angel White Wings","Maitreya","Botis","Susano-O","Alilat","Odin","Sraosha","Huang Di","Krishna","Chi You","Matador","Vasuki","Mot","White Rider","Samael","Aniel","Inanna","Red Rider","Mara","Mastema","Black Rider","Seraph","Demiurge","Shiva","Pale Rider","Mitra-Buddha","Trumpeter","Metatron","Merkabah","Lucifer","Mother Harlot","Satan"]
 
@@ -792,22 +812,22 @@ recruitable_demons = df_bestiary[df_bestiary['recruitable'] != '[n/a]']['name'].
 
 ####### NEED TO NOT RUN THIS & THE PICKLING FOR USE WITH FLASK        
         
-if False:
-    #target_demon_input = 'Pele'
-    target_demon_input = 'Illuyanka'
+if True:
+    target_demon_input = 'Pele'
+    #target_demon_input = 'Matador'
     logging.info("Starting search for demon "+target_demon_input+"...")
     skills_input = ['']
     # skills_input = ['Posumudi','Mudo']
-    #skills_input = ['Agidyne']
+    #skills_input = ['Trisagion']
     fusion_level = -1
-    skill_match_only = True
+    skill_match_only = False
     max_only = True
-    #demon_filter_list = ['Mushussu']
-    demon_filter_list = ['Ouroboros','Mushussu']
+    demon_filter_list = []
+    #demon_filter_list = ['Ouroboros','Mushussu']
     #demon_filter_list  = ['Centaur','Sudama']
     strict_filter = True
             
     rc = ResultCluster(target_demon_input,skills_input,fusion_level,skill_match_only,max_only,demon_filter_list,strict_filter)
-    rc.generate_results()
+    #rc.generate_results()
     #rc.print_results()
 
