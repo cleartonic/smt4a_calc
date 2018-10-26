@@ -25,10 +25,10 @@ class Profile:
             skill_list.remove('')
         self.skill_list = skill_list
         
-        filter_demon_list = list(set([self.filter_demon1,self.filter_demon2,self.filter_demon3,self.filter_demon4]))
-        if len(filter_demon_list) > 1 and '' in filter_demon_list:
-            filter_demon_list.remove('')
-        self.filter_demon_list  = filter_demon_list 
+        demon_filter_list = list(set([self.filter_demon1,self.filter_demon2,self.filter_demon3,self.filter_demon4]))
+        if len(demon_filter_list) > 1 and '' in demon_filter_list:
+            demon_filter_list.remove('')
+        self.demon_filter_list  = demon_filter_list
 		
 class SkillForm(FlaskForm):
     skill1 = SelectField(label='Skill', choices=SKILL_LIST)
@@ -60,7 +60,7 @@ def hello():
 	#if form.validate():
     if request.method=='POST':
         p = Profile(form.data)
-        rc = smt.ResultCluster(p.target_demon, p.skill_list, p.fusion_level,p.skill_match_only,p.max_only,p.strict_filter)
+        rc = smt.ResultCluster(p.target_demon, p.skill_list, p.fusion_level,p.skill_match_only,p.max_only,p.demon_filter_list,p.strict_filter)
         rc.generate_results()
         
         # Take score_dict, which is in: { OVERALL SCORE : [list of skill/recruit/demon] } format
@@ -73,8 +73,6 @@ def hello():
         if rc.result_failure:
             return render_template('test.html',form=form)
         else:
-            if len(p.filter_demon_list) > 0 and '' not in p.filter_demon_list:
-                rc.filter_results(p.filter_demon_list)
             output_scores = rc.find_matching_scores()
             return render_template('test.html',form=form, output_scores = output_scores, max_tree_results = p.max_tree_results)
     else:

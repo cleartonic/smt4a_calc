@@ -10,6 +10,10 @@ import numpy as np
 import pickle
 import itertools
 import logging
+#logging.basicConfig(level=logging.INFO,format='%(asctime)s %(levelname)-8s %(message)s', datefmt='%m-%d %H:%M:%S')
+logging.basicConfig(level=logging.DEBUG,format='%(asctime)s %(levelname)-8s %(message)s', datefmt='%m-%d %H:%M:%S')
+
+
 
 logging.info("Script start.")
 
@@ -117,6 +121,17 @@ def find_scores(dict_list):
     return comp_dict
 
     # Build demons, stored in demon_master
+    
+    
+    
+def find_fusion_limit(final_demon, results_list):
+    # argument demon_list: input demons, get min level for fusion (limit)
+    num = []
+    num.append(final_demon.lv)
+    for i in results_list:
+        num.append(i.fusion_limit)
+    return min(num)
+    
 def build_demon_master():
     # pass fusion_limit as integer
 
@@ -157,7 +172,7 @@ class Demon:  #['race', 'lv', 'name', 'hp', 'mp', 'st', 'dx', 'ma', 'ag', 'lu', 
     def find_fusions(self,demon_master,fusion_level,final_result_lv):
         self.fusions, self.fusions_names = assign_combinations(self.name,demon_master,fusion_level,final_result_lv)  # using the newly assigned self.name, find all combinations and store both the name list and the Demon objects list
         self.fusions.append([self])    # Assigns itself, useful for combo searches later
-        self.fusions_names.append([self]) # Assigns itself, useful for combo searches later
+        self.fusions_names.append([self.name]) # Assigns itself, useful for combo searches later
     def find_skills(self,skill_list):
         self.skill_dict = dict(zip(skill_list,[0] * len(skill_list))) # Creates a dictionary to store each skill passed and whether its been met or not
         for skill in skill_list:
@@ -262,15 +277,18 @@ class Result:
                 logging.info(self.demon_list_str, self.demon_num)
 
             self.skill_output = req_str
-            self.skill_score = int(round(self.skill_score_num / self.skill_score_max,2) * 100)
+            if len(self.skill_dict) == 0:  # In the event that no skills were provided, they inherently are '100' scoring 
+                self.skill_score = int(100)
+            else:
+                self.skill_score = int(round(self.skill_score_num / self.skill_score_max,2) * 100)
             self.recruit_score = int(round(self.recruit_score_num / self.recruit_score_max,2) * 100)
             self.scored = True
             
         
 class ResultTree:
     
-    # The purpose of a ResultTree is to store one combination for a result demon two level downs.
-    # For example: Mot → [one of  73 combinations of Mot] → [One possible combinations for one those 73]
+    # The purpose of a ResultTree is to store one combination for a result demon two levels down
+    # For example: Mot → [one of  73 combinations of Mot] → [One possible combinations for one those 73] + [Compliment combination for one those 73]
     # All the Results objects are stored in a master list, irrespective of what the demons are along the way
     
     # Each element represents the combination of results that are needed. So, at least 2 Result objects. Each element will need to be score independently.
@@ -325,15 +343,27 @@ class ResultTree:
         # Update: Never implemented. Delete if necessary...
         
         all_demons = []
+        all_demons_str = []
+        all_demons_skills_str = []
+        
         all_demons.append(self.final_result)
         for i in self.results_list:
             all_demons.append(i.final_result)
-        for i in self.results_list:
             for demon in i.demon_list:
                 all_demons.append(demon)
 
+        
+
         all_demons = list(set(all_demons))
+        for demon in all_demons:
+            all_demons_str.append(demon.name)
+            for skill in demon.skill_list:
+                all_demons_skills_str.append(skill)
+                
+        all_demons_skills_str = list(set(all_demons_skills_str))
         self.all_demons = all_demons
+        self.all_demons_str = all_demons_str
+        self.all_demons_skills_str = all_demons_skills_str
         self.hash = hash(str(all_demons))
         
             
@@ -346,7 +376,10 @@ class ResultTree:
         self.skill_dict_score = find_scores(skill_dict_compile)
         self.skill_score_num = sum(list(self.skill_dict_score.values()))
         self.skill_score_max = len(self.skill_dict_score.values())
-        self.skill_score =  int(round(self.skill_score_num / self.skill_score_max,2)*100)
+        if self.skill_score_max <= 0:
+            self.skill_score = 100   # in the event no skill_score_max (i.e. =0), then force 100
+        else:
+            self.skill_score =  int(round(self.skill_score_num / self.skill_score_max,2)*100)
         self.scored = True
         
         # Check recruitable:
@@ -390,14 +423,19 @@ class ResultCluster:
     #   It shouldn't matter how you get to the result_demon, just that you get there with the skills along the way,
     #   and that the skill score / recruitable score will dictate its viability
             
-    def __init__(self, final_result_str,skills_input,fusion_level,skill_match_only,max_only,strict_filter):
+    def __init__(self, final_result_str,skills_input,fusion_level,skill_match_only,max_only,demon_filter_list,strict_filter):
         self.resulttree_list = []
+        if skills_input == ['']:
+            skills_input = []
         self.skills_input = skills_input
         self.skill_match_only = skill_match_only
         self.save_only_flag = True
         self.max_only_flag = max_only        
         self.demon_master = build_demon_master()
         self.final_result = find_demon(final_result_str,self.demon_master)
+        if demon_filter_list == ['']:
+            demon_filter_list = []
+        self.demon_filter_list = demon_filter_list
         self.strict_filter = strict_filter
         self.result_failure = False     # Init as false, later changed to true if something doesn't work (mostly, if the search returns zero results)
         if type(fusion_level) != int or fusion_level is None or fusion_level <= 0:
@@ -418,9 +456,9 @@ class ResultCluster:
         logging.info("Scored demons on skill list.")
         logging.info("Starting fusion combo generation...")
         
-        
-        # Data validation/cleanup
         final_master = []
+        
+        # Cleanup skill_match_only to properly reflect if skills are being matched
         if self.skills_input == ['']:
             self.skill_match_only = False
         
@@ -452,102 +490,141 @@ class ResultCluster:
         for i in final_master:
             for y in i:
                 master2.append(y)
-        
-        
-        # After result_trees are generated, they must be checked for flags. 
-        
-        self.resulttree_list = []        
-        for i in master2:
-            rt = ResultTree(self.final_result,i)
-            # Fusion limit flag: Only add results that are under the fusion level limit
-            if fusion_limit >= rt.fusion_limit:
-                self.resulttree_list.append(rt)
-        
         logging.info("List generation complete.")
-        
+        logging.debug("Len of master: "+str(len(master2)))
+        # After result_trees are generated, they must be checked for flags. 
+        logging.info("Result tree creation (& fusion limit checking) start...")
+        self.resulttree_list = []        
+
+        for i in master2:
+            flag = True  # Set up a flag based on a bunch of conditions that must be triggered to make it not be added
+            #logging.debug(self.final_result)
+            #logging.debug(i)
+                
+            rt = ResultTree(self.final_result,i)
+            if fusion_limit < rt.fusion_limit:  # Reject if fusion limit not met
+                flag = False
+            
+            if len(self.demon_filter_list) > 0:
+                if self.strict_filter:  # strict filter means ALL demons must be in the result tree
+                    for demon_filter in self.demon_filter_list:
+                        #logging.debug("DEMON FILTER: "+demon_filter)
+                        #logging.debug("ALL DEMONS: "+str(rt.all_demons_str))
+                        if demon_filter not in rt.all_demons_str: # If any filter_demon is not in the all_demons for the result tree, then reject
+                            flag = False
+                else: # not strict-filter means that any one demon must appear in the all_demons, but that's all 
+                    temp_flag = False
+                    for demon_filter in self.demon_filter_list:
+                        if demon_filter in rt.all_demons_str:
+                            temp_flag = True
+                            break  # break as soon as one condition is met
+                    if temp_flag == False:  # If no filter_demons were found ever in the all_demons_str, then it does not pass 
+                        flag = False
+
+            if self.skill_match_only and len(self.skills_input) > 0:  # if skill_match_only is on, then every skill must be present in the rt's all_skills list:
+                #logging.debug("All demons' skills: ")
+                for skill in self.skills_input:
+                    #logging.debug("Skill match:: "+str(skill))
+                    if skill not in rt.all_demons_skills_str: # if any skill is not in the final list
+                        flag = False
+
+            if flag:
+                self.resulttree_list.append(rt)
+
+        logging.debug("Len of result tree list: "+str(len(self.resulttree_list)))
+
+
+        logging.info("Result tree creation complete.")
         if len(self.resulttree_list) > 0:
             logging.info("Result tree scoring start...")
             
-            result_tree2 = []
+            
+
+#            result_tree2 = []
             for result_tree_instance in self.resulttree_list:  # result_tree_instance = 1 item. result_tree and result_tree2 are lists
                 result_tree_instance.score_results()
-                if self.skill_match_only:
-                    # Pure skill match flag: Only add results that fully meet the skill criteria. E.g., if not skills present at all, discard entirely
-                    # Also only applies when the skill list is populated. Otherwise, ignore, because nothing will match and it'll return blanks. 
-                    
-                    if result_tree_instance.skill_score == 1:
-                        result_tree2.append(result_tree_instance)
-                        
-            if self.skill_match_only:
-                self.resulttree_list = result_tree2[:]
                 
-            if len(self.resulttree_list) <= 0:
-                logging.info("Result tree scoring complete... NO RESULTS FOUND.")
-                self.result_failure = True
-            else:
-                logging.info("Result tree scoring complete.")
-            
+                # The below is deprecated because of filtering above. If skill_match is on, all skills must be present anyways
+                # and should have a score of 100
+                
+#                if self.skill_match_only:
+#                    # Pure skill match flag: Only add results that fully meet the skill criteria. E.g., if not skills present at all, discard entirely
+#                    # Also only applies when the skill list is populated. Otherwise, ignore, because nothing will match and it'll return blanks. 
+#                    
+#                    if result_tree_instance.skill_score == 100:
+#                        result_tree2.append(result_tree_instance)
+#                        
+#            if self.skill_match_only:
+#                self.resulttree_list = result_tree2[:]
 
-                logging.info("Creating final_str_list (list of combinations to final result)...")
-                self.final_str_list = []
-                for rt in self.resulttree_list:
-                    if rt.final_str not in self.final_str_list:
-                        self.final_str_list.append(rt.final_str)
-
-                logging.info("Finding most powerful category...")
-                rc_scores = []
-                
-                for result_tree in self.resulttree_list:
-                    if result_tree.score_list not in rc_scores:
-                        rc_scores.append(result_tree.score_list)
-                self.score_list = rc_scores
-                rc2 = []
-                for i in rc_scores:  # janky, not elegant scoring system to prioritize: skills, recruitable, demon num
-                    rc2.append(sum([i[0]*100000,i[1]*1000,1/i[2]]))
-                local_max = rc2.index(max(rc2))
-                self.score_dict = dict(zip(rc2,rc_scores))
-                
-                
-                # Cleanup the dict to be sorted
-                
-                new_dict = {}
-                key_list = sorted(self.score_dict.keys())[::-1]
-                for key in key_list:
-                    new_dict[key] = self.score_dict[key]
-                self.score_dict = new_dict
-                
-                
-                self.max_only_dict = rc_scores[local_max]
-                
-    def filter_results(self,filter_list):
+            logging.info("Result tree scoring complete.")
         
-        # filter_list = list of text string demons
-        # sets a new self.resulttree_list based on filtering query
-        
-        temp_results = []
 
-        for rt in self.resulttree_list:  # Below code is checking for presence of filter_demon's name string anywhere in the result tree
-            filter_dict = dict(zip(filter_list,[0] * len(filter_list)))  # Used to ensure that all demons are met in each check    
-            for filter_demon in filter_list:
-                if filter_demon in rt.final_str:  # checks the final_str, which has both the final result's name and the results within
-                    filter_dict[filter_demon] = 1
-            else:
-                for result in rt.results_list:
-                    for filter_demon in filter_list:
-                        for demon in result.demon_list:  # Check every ingredient demon in every result in the resulttree
-                            if filter_demon == demon.name:
-                                filter_dict[filter_demon] = 1  # upon one match, break the demon in result.demon_list loop 
-                                break
-                        
+            logging.info("Creating final_str_list (list of combinations to final result)...")
+            self.final_str_list = []
+            for rt in self.resulttree_list:
+                if rt.final_str not in self.final_str_list:
+                    self.final_str_list.append(rt.final_str)
+
+            logging.info("Finding most powerful category...")
+            rc_scores = []
             
-            if self.strict_filter:
-                if sum(filter_dict.values()) >= len(filter_dict):  # ensure that all demons are in the resulttree
-                    temp_results.append(rt)
-            else:
-                if sum(filter_dict.values()) >= 1:  # ensure that all demons are in the resulttree
-                    temp_results.append(rt)
-                    
-        self.resulttree_list = temp_results
+            for result_tree in self.resulttree_list:
+                if result_tree.score_list not in rc_scores:
+                    rc_scores.append(result_tree.score_list)
+            self.score_list = rc_scores
+            rc2 = []
+            for i in rc_scores:  # janky, not elegant scoring system to prioritize: skills, recruitable, demon num
+                rc2.append(sum([i[0]*100000,i[1]*1000,1/i[2]]))
+            local_max = rc2.index(max(rc2))
+            self.score_dict = dict(zip(rc2,rc_scores))
+            
+            
+            # Cleanup the dict to be sorted
+            
+            new_dict = {}
+            key_list = sorted(self.score_dict.keys())[::-1]
+            for key in key_list:
+                new_dict[key] = self.score_dict[key]
+            self.score_dict = new_dict
+            
+            
+            self.max_only_dict = rc_scores[local_max]
+        else:
+            logging.info("NO RESULTS. No result trees, no scoring performed.")
+            self.result_failure = True
+            
+# =============================================================================
+#     def filter_results(self,filter_list):
+#         
+#         # filter_list = list of text string demons
+#         # sets a new self.resulttree_list based on filtering query
+#         
+#         temp_results = []
+# 
+#         for rt in self.resulttree_list:  # Below code is checking for presence of filter_demon's name string anywhere in the result tree
+#             filter_dict = dict(zip(filter_list,[0] * len(filter_list)))  # Used to ensure that all demons are met in each check    
+#             for filter_demon in filter_list:
+#                 if filter_demon in rt.final_str:  # checks the final_str, which has both the final result's name and the results within
+#                     filter_dict[filter_demon] = 1
+#             else:
+#                 for result in rt.results_list:
+#                     for filter_demon in filter_list:
+#                         for demon in result.demon_list:  # Check every ingredient demon in every result in the resulttree
+#                             if filter_demon == demon.name:
+#                                 filter_dict[filter_demon] = 1  # upon one match, break the demon in result.demon_list loop 
+#                                 break
+#                         
+#             
+#             if self.strict_filter:
+#                 if sum(filter_dict.values()) >= len(filter_dict):  # ensure that all demons are in the resulttree
+#                     temp_results.append(rt)
+#             else:
+#                 if sum(filter_dict.values()) >= 1:  # ensure that all demons are in the resulttree
+#                     temp_results.append(rt)
+#                     
+#         self.resulttree_list = temp_results
+# =============================================================================
         
         
     def find_matching_scores(self):
@@ -712,19 +789,25 @@ recruitable_demons = df_bestiary[df_bestiary['recruitable'] != '[n/a]']['name'].
 ############### TEST AREA ######################
 
 
-        
-        
+
 ####### NEED TO NOT RUN THIS & THE PICKLING FOR USE WITH FLASK        
         
-if True:
-    target_demon_input = 'Pele'
+if False:
+    #target_demon_input = 'Pele'
+    target_demon_input = 'Illuyanka'
+    logging.info("Starting search for demon "+target_demon_input+"...")
     skills_input = ['']
+    # skills_input = ['Posumudi','Mudo']
+    #skills_input = ['Agidyne']
     fusion_level = -1
     skill_match_only = True
     max_only = True
-    strict_filter = False
+    #demon_filter_list = ['Mushussu']
+    demon_filter_list = ['Ouroboros','Mushussu']
+    #demon_filter_list  = ['Centaur','Sudama']
+    strict_filter = True
             
-    rc = ResultCluster(target_demon_input,skills_input,fusion_level,skill_match_only,max_only,strict_filter)
+    rc = ResultCluster(target_demon_input,skills_input,fusion_level,skill_match_only,max_only,demon_filter_list,strict_filter)
     rc.generate_results()
     #rc.print_results()
 
