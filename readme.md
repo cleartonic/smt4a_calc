@@ -1,9 +1,13 @@
 # SMT Reverse Fusion Calculator
 
 #### A tool to help identify target demons by dynamically searching for fusions based on matching skills, recruitability, and demon number.
+#### [Link to browser interface:](http://cleartonic.pythonanywhere.com/)
 
 ### Current version:
 - Supports SMT4: Apocalypse (English)
+
+### Next versions:
+- Implement 3/4 fusion requirement demons (functional as of now, but generates too many combinations which crashes the program. Need to smart filter somehow)
 
 ![image](diagram.png?raw=true "image")
 
