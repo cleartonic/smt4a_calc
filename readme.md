@@ -38,9 +38,11 @@ Skill - Up to 8 skills can be added. Each result tree will be scored individuall
 - Fusion level 99 assumes all fusions are available
 - Fusions are assumed to be limited to the max of all demons in the fusion. Theoretically, the player could grind demons past their fusion limit, but this system doesn't accommodate this, and assumes the player can recruit/make demons up to their fusion level. If this is a problem, just manually increase the fusion limit. 
 
-#### Max trees - The number of trees to display. Each tree represents the first level down to make the target demon, at a specific score (based on the whole tree's fusions). Note that if the 'highest scoring output only' flag is set, only the top scoring trees will appear, which will drastically decrease the number of trees (and also speed up processing). 
+#### Max trees - The number of trees to display. 
+Each tree represents the first level down to make the target demon, at a specific score (based on the whole tree's fusions). Note that if the 'highest scoring output only' flag is set, only the top scoring trees will appear, which will drastically decrease the number of trees (and also speed up processing). 
 
-#### Max tree results - The number of results in the expanded view for every result tree. That is, when you click on the results bar for a given result tree, how many entries appear. This is set to 10, because most result trees can have a huge amount. This can be set to any number as the limit, but generation may take longer. Further, use filter demons if looking for a specific demon among the trees. 
+#### Max tree results - The number of results in the expanded view for every result tree. 
+When you click on the results bar for a given result tree, how many entries appear. This is set to 10, because most result trees can have a huge amount. This can be set to any number as the limit, but generation may take longer. Further, use filter demons if looking for a specific demon among the trees. 
 
 #### Flags:
 - "Strict skill matching only" and "Strict filtering on all input demons" mentioned above
