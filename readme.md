@@ -1,7 +1,7 @@
 # SMT Reverse Fusion Calculator
 
 #### A tool to help identify target demons by dynamically searching for fusions based on matching skills, recruitability, and demon number.
-#### <a href="smt.cleartonic.net" target="_blank">Link to browser interface</a>
+#### <a href="http://smt.cleartonic.net" target="_blank">Link to browser interface</a>
 
 ### Current version:
 - Supports SMT4: Apocalypse (English)
