@@ -8,6 +8,7 @@
 
 ### Next versions:
 - Implement 3/4 fusion requirement demons (functional as of now, but generates too many combinations which crashes the program. Need to smart filter somehow)
+- Support demon information/graphics in the interface, such as recruit locations, levels, etc.
 
 ![image](diagram.png?raw=true "image")
 
