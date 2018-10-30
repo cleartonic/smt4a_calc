@@ -20,7 +20,7 @@ logging.info("Script start.")
 
 pd.options.mode.chained_assignment = None
 
-pickle_check = True
+pickle_check = False
 
 
 ### TO DO
@@ -171,9 +171,21 @@ class Demon:  #['race', 'lv', 'name', 'hp', 'mp', 'st', 'dx', 'ma', 'ag', 'lu', 
         self.name_output = self.name + self.demon_qualifier
             
     def find_fusions(self,demon_master,fusion_level,final_result_lv):
-        self.fusions, self.fusions_names = assign_combinations(self.name,demon_master,fusion_level,final_result_lv)  # using the newly assigned self.name, find all combinations and store both the name list and the Demon objects list
-        self.fusions.append([self])    # Assigns itself, useful for combo searches later
-        self.fusions_names.append([self.name]) # Assigns itself, useful for combo searches later
+        temp_fusions, temp_fusion_names = assign_combinations(self.name,demon_master,fusion_level,final_result_lv)  # using the newly assigned self.name, find all combinations and store both the name list and the Demon objects list
+        temp_fusions_2 = [[self]] + temp_fusions
+        temp_fusion_names_2 = [[self.name]] + temp_fusion_names
+        self.fusions = temp_fusions_2
+        self.fusions_names = temp_fusion_names_2 
+        
+        #print(self.fusions)
+        #print(self.fusion_names)
+        
+        
+        #self.fusions, self.fusions_names = assign_combinations(self.name,demon_master,fusion_level,final_result_lv)  # using the newly assigned self.name, find all combinations and store both the name list and the Demon objects list
+        #self.fusions.append([self])    # Assigns itself, useful for combo searches later
+        #self.fusions_names.append([self.name]) # Assigns itself, useful for combo searches later
+
+        
     def find_skills(self,skill_list):
         self.skill_dict = dict(zip(skill_list,[0] * len(skill_list))) # Creates a dictionary to store each skill passed and whether its been met or not
         for skill in skill_list:
@@ -185,11 +197,10 @@ class Demon:  #['race', 'lv', 'name', 'hp', 'mp', 'st', 'dx', 'ma', 'ag', 'lu', 
             if self.skill_dict[skill] > 0:
                 self.matching_skills.append(skill)
                 
-        self.matching_skills_str = ''
-        for skill in self.matching_skills:
-            self.matching_skills_str = self.matching_skills_str.join((skill+" "))
-        if self.matching_skills_str == '':
-            self.matching_skills_str = '(no skill)'
+        self.matching_skills_str = ' '.join(self.matching_skills)
+
+        #if self.matching_skills_str == ' ':
+            #self.matching_skills_str = '(no skill)'
             
         self.update_name()
     def update_name(self):
@@ -455,12 +466,13 @@ class ResultCluster:
             demon.find_skills(self.skills_input)
             demon.find_fusions(self.demon_master,self.fusion_level,self.final_result.lv)  #Passing the FINAL RESULT'S LEVEL as the filter. This will pass all the way down to ALL demon fusions
         logging.info("Scored demons on skill list.")
-        time.sleep(2)
+        #time.sleep(2)
         logging.info("Starting fusion combo generation...")
-        time.sleep(2)
+        #time.sleep(2)
 
+        # global final_combo_perm, final_master, master2
         final_master = []
-        
+
         # Cleanup skill_match_only to properly reflect if skills are being matched
         if self.skills_input == ['']:
             self.skill_match_only = False
@@ -469,40 +481,62 @@ class ResultCluster:
         if type(fusion_limit) != int or fusion_limit  <= 0:
             fusion_limit = self.final_result.lv
 
-    
-        for i, final_combo in enumerate(self.final_result.fusions):
-            final_combo_perm = []
-            combo_len = len(final_combo)
-            for demon_num in range(combo_len):
-                demon = final_combo[demon_num]
+
+        check = False
+        
+        if check:
+            for i, final_combo in enumerate(self.final_result.fusions):
+                final_combo_perm = []
                 temp_fusions = []
-                for fusion in demon.fusions:
-                    r = Result(demon,fusion)
-                    r.find_skill_score()    # Upon generation, find the skill score for the whole result
-                    if fusion_limit >= r.fusion_limit: # Check for fusion_limits. If the fusion_limit is higher than the result's fusion_limit, then add to the list. Otherwise discard
-                        temp_fusions.append(r)  # add to list for permutation
-                    else:
-                        del(r) # delete from memory
-                        
-                final_combo_perm.append(temp_fusions)
-            logging.debug("Generated fusion combo list.")
-            time.sleep(2)
-            logging.debug("Creating all combinations to master...")
-            #
-            #
-            #
-            # WORK ON THIS LINE
-            #
-            #
-            final_master.append(list(itertools.product(*final_combo_perm)))
-            #
-            #
-            #
-            #
-            #
-            #
-            #
-            #
+                for demon_num in range(len(final_combo)):
+                    if demon_num < 2:
+                        demon = final_combo[demon_num]            
+                        #logging.debug("DEMON FUSIONS "+str(len(demon.fusions)))
+                        temp_fusions = []
+                        for fusion in demon.fusions:
+
+                            r = Result(demon,fusion)
+                            r.find_skill_score()    # Upon generation, find the skill score for the whole result
+                            if fusion_limit >= r.fusion_limit: # Check for fusion_limits. If the fusion_limit is higher than the result's fusion_limit, then add to the list. Otherwise discard
+                                temp_fusions.append(r)  # add to list for permutation
+                            else:
+                                del(r) # delete from memory
+                    else:             # For the 3rd/4th demon in a fusion, set it to be equal to itself only
+                        logging.debug("Set demon "+demon.name+" hardcoded without fusions.")
+                        time.sleep(1)
+                        r = Result(demon,[demon])
+                        r.find_skill_score()
+                        temp_fusions.append(r)  # add to list for permutation                        
+                            
+                    final_combo_perm.append(temp_fusions)
+                final_master.append(list(itertools.product(*final_combo_perm)))
+        
+        else:
+
+ #OLD WORKING CODE
+            
+            for i, final_combo in enumerate(self.final_result.fusions):
+                final_combo_perm = []
+                temp_fusions = []
+                for demon_num in range(len(final_combo)):
+                    demon = final_combo[demon_num]            
+                    #logging.debug("DEMON FUSIONS "+str(len(demon.fusions)))
+                    temp_fusions = []
+                    for fusion in demon.fusions:
+                        # logging.info("DEMON NAME "+demon.name)
+                        r = Result(demon,fusion)
+                        r.find_skill_score()    # Upon generation, find the skill score for the whole result
+                        if fusion_limit >= r.fusion_limit: # Check for fusion_limits. If the fusion_limit is higher than the result's fusion_limit, then add to the list. Otherwise discard
+                            temp_fusions.append(r)  # add to list for permutation
+                        else:
+                            del(r) # delete from memory
+                            
+                    final_combo_perm.append(temp_fusions)
+                final_master.append(list(itertools.product(*final_combo_perm)))
+
+
+
+        
         logging.info("Fusion combo generation complete.")
         
         logging.info("List generation start...")
@@ -511,7 +545,8 @@ class ResultCluster:
             for y in i:
                 master2.append(y)
         logging.info("List generation complete.")
-        logging.debug("Len of master: "+str(len(master2)))
+        self.total_results = len(master2)
+        logging.debug("Len of master: "+str(self.total_results))
         # After result_trees are generated, they must be checked for flags. 
         logging.info("Result tree creation (& fusion limit checking) start...")
         self.resulttree_list = []        
@@ -551,7 +586,8 @@ class ResultCluster:
             if flag:
                 self.resulttree_list.append(rt)
 
-        logging.debug("Len of result tree list: "+str(len(self.resulttree_list)))
+        self.total_filtered_results = len(self.resulttree_list)
+        logging.debug("Len of result tree list: "+str(self.total_filtered_results))
 
 
         logging.info("Result tree creation complete.")
@@ -648,8 +684,13 @@ class ResultCluster:
         
         
     def find_matching_scores(self):
+        logging.info("Starting score matching for html output...")
         # Input a score list [x,x,x]
         # Return a list of ResultTrees with matching score_list
+        
+        # This could be WAY more efficient but it's real tough
+        # Right now it chooses each final_str (demon = fuse1 x fuse2), then sifts through EVERY
+        # resulttree MULTIPLE times. Problem is ordering, and capturing the unique combination of scores and final_str
         
         if self.max_only_flag:
             temp_score_dict = [list(self.score_dict.values())[0]]
@@ -667,7 +708,14 @@ class ResultCluster:
                 if len(rt_list) > 0:
                     x[num] = score, final_str, rt_list
                     num = num + 1
-        # 
+                    
+                    
+        # WIP for above note about efficiency. Problem is capturing all unique combinations of below (scores) and final_str           
+        #x = dict(zip(range(len(self.score_dict)),self.score_dict.values()))
+        
+        
+        
+        logging.info("Finished score matching for html output.")
         return x
 
                 
@@ -812,22 +860,25 @@ recruitable_demons = df_bestiary[df_bestiary['recruitable'] != '[n/a]']['name'].
 
 ####### NEED TO NOT RUN THIS & THE PICKLING FOR USE WITH FLASK        
         
-if True:
+if False:
     target_demon_input = 'Pele'
-    #target_demon_input = 'Matador'
+    #target_demon_input = 'Illuyanka'
     logging.info("Starting search for demon "+target_demon_input+"...")
     skills_input = ['']
-    # skills_input = ['Posumudi','Mudo']
+    #skills_input = ['Agidyne','Mahamaon']
     #skills_input = ['Trisagion']
     fusion_level = -1
     skill_match_only = False
-    max_only = True
+    max_only = False
     demon_filter_list = []
     #demon_filter_list = ['Ouroboros','Mushussu']
     #demon_filter_list  = ['Centaur','Sudama']
     strict_filter = True
             
     rc = ResultCluster(target_demon_input,skills_input,fusion_level,skill_match_only,max_only,demon_filter_list,strict_filter)
-    #rc.generate_results()
+    rc.generate_results()    
+    x = rc.find_matching_scores()
     #rc.print_results()
-
+#    for name in dir():
+#        if not name.startswith('_'):
+#            del globals()[name]

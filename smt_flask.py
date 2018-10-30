@@ -49,6 +49,7 @@ class SkillForm(FlaskForm):
     skill_match_only = BooleanField(label='Strict skill match only:',default=True)
     strict_filter = BooleanField(label='Strict filtering on all input filter demons:')
     fusion_level = IntegerField(label='Max Fusion Level (blank defaults to target demon level)')
+    max_trees = IntegerField(label='Max trees',default=10)
     max_tree_results = IntegerField(label='Max tree results',default=10)
     max_only = BooleanField(label='Highest scoring output only:',default=True)
  
@@ -74,7 +75,11 @@ def hello():
             return render_template('index.html',form=form)
         else:
             output_scores = rc.find_matching_scores()
-            return render_template('index.html',form=form, output_scores = output_scores, max_tree_results = p.max_tree_results)
+            output_scores = {k: v for k, v in output_scores.items() if k < p.max_trees }
+            total_results = rc.total_results
+            total_filtered_results = rc.total_filtered_results
+            del(rc)
+            return render_template('index.html', total_results=total_results, total_filtered_results=total_filtered_results,form=form, output_scores = output_scores, max_trees = p.max_trees, max_tree_results = p.max_tree_results)
     else:
         return render_template('index.html',form=form)
  
@@ -87,4 +92,5 @@ def utility_functions():
     return dict(mdebug=print_in_console)
     
 if __name__ == "__main__":
+    application.jinja_env.cache = {}
     application.run(debug=True)
