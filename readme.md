@@ -52,3 +52,8 @@ When you click on the results bar for a given result tree, how many entries appe
 #### Flags:
 - "Strict skill matching only" and "Strict filtering on all input demons" mentioned above
 - "Highest scoring output only" will output the result trees with the highest score (score = skills, recruitable and demon, prioritized in that order)
+
+
+### Special Thanks
+- Thanks to [Caerulius](https://twitter.com/Caerulius) for helping with javascript to support the website's viewability
+-Inspiration & data from the impressive tools at [https://aqiu384.github.io/megaten-fusion-tool/home](https://aqiu384.github.io/megaten-fusion-tool/home)
