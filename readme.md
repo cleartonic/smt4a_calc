@@ -55,5 +55,5 @@ When you click on the results bar for a given result tree, how many entries appe
 
 
 ### Special Thanks
-- Thanks to [Caerulius](https://twitter.com/Caerulius) for helping with javascript to support the website's viewability
--Inspiration & data from the impressive tools at [https://aqiu384.github.io/megaten-fusion-tool/home](https://aqiu384.github.io/megaten-fusion-tool/home)
+- Thanks to [Caerulius](https://twitter.com/Caerulius) for helping with javascript to support the website's viewability  
+- Inspiration & data from the impressive tools at [https://aqiu384.github.io/megaten-fusion-tool/home](https://aqiu384.github.io/megaten-fusion-tool/home)
